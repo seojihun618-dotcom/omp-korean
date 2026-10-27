@@ -1,0 +1,71 @@
+name: Windows x64 release
+
+on:
+  push:
+    tags:
+      - 'v*-ko.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing v<release.json.version> tag to publish; leave empty for build-only artifact'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: windows-2022
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          persist-credentials: false
+
+      - name: Validate release metadata and tag
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $manifest = Get-Content release.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ($manifest.version -cnotmatch '^\d+\.\d+\.\d+-ko\.\d+$') { throw 'Invalid release version.' }
+          if ($env:RELEASE_TAG -and $env:RELEASE_TAG -cne "v$($manifest.version)") {
+            throw "Tag must equal v$($manifest.version), not $env:RELEASE_TAG."
+          }
+          if ($manifest.bunVersion -cne '1.4.4') { throw 'Workflow and manifest must both pin Bun 1.4.4.' }
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+
+      - name: Reconstruct, build, smoke and package
+        shell: powershell
+        run: ./scripts/build-release.ps1 -Repository $env:GITHUB_REPOSITORY
+
+      - name: Upload build-only artifact
+        if: env.RELEASE_TAG == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: omp-korean-windows-x64
+          path: |
+            release/*.zip
+            release/SHA256SUMS
+            release/release.json
+            release/install.ps1
+          if-no-files-found: error
+
+      - name: Publish tag release
+        if: env.RELEASE_TAG != ''
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $manifest = Get-Content release/release.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          $assets = @("release/$($manifest.archive)", 'release/SHA256SUMS', 'release/release.json', 'release/install.ps1')
+          & gh release create $env:RELEASE_TAG @assets --repo $env:GITHUB_REPOSITORY --verify-tag --title $env:RELEASE_TAG --notes-file RELEASE_NOTES.md
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub release creation failed; no remote repository was created.' }
