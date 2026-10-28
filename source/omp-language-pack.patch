@@ -43363,6 +43363,51 @@ index 1f902af..eb15db5 100644
  	});
  
  	it("keeps the default listing chat-only and selects runner or all pools", () => {
+diff --git a/packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts b/packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts
+index 7e22dc8..5e09c6a 100644
+--- a/packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts
++++ b/packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts
+@@ -263,9 +263,11 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
+ 
+ 	it("opens a default tab in the browser of the tab omp used last, not the first selected one", async () => {
+ 		const secondHello = Promise.withResolvers<void>();
+-		let hellos = 0;
+-		const fixture = await launchRelayFixture(message => {
+-			if (message === "extension connected" && ++hellos === 2) secondHello.resolve();
++		const connectedBrowsers = new Set<string>();
++		const fixture = await launchRelayFixture((message, data) => {
++			if (message !== "extension connected" || typeof data?.instanceId !== "string") return;
++			connectedBrowsers.add(data.instanceId);
++			if (connectedBrowsers.size === 2) secondHello.resolve();
+ 		});
+ 		// The first browser shows the first selected tab, which a new tab would otherwise follow.
+ 		const human = await fixture.browser.newPage();
+@@ -280,12 +282,22 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
+ 		/** The browser a relay target id belongs to (`PAGE<browser>.<tab>`). */
+ 		const browserOf = (targetId: string) => targetId.slice(4, targetId.lastIndexOf("."));
+ 		try {
+-			// Borrowing waits until the relay lists the tab, so the first browser's selected tab is listed first.
++			if (!("browser" in relay)) throw new Error("Expected relay Chromium connection");
++			await relay.browser.waitForTarget(target => target.type() === "page" && target.url() === human.url(), {
++				timeout: 15_000,
++			});
++			// Establish the selected page before testing which browser an owned tab follows.
+ 			const inFirst = await acquireTab(names[0]!, relay, { target: "Human sentinel", timeoutMs: 15_000 });
+ 			const other = await fixture.launchBrowser();
+-			// The relay announces a browser's tabs to connected clients only as they change after its hello.
++			// A reconnect from the first browser is not the second browser's hello.
+ 			await secondHello.promise;
+-			await (await other.browser.newPage()).goto(`${fixture.origin}/first`);
++			const firstUrl = `${fixture.origin}/first`;
++			const announced = relay.browser.waitForTarget(
++				target => target.type() === "page" && target.url() === firstUrl,
++				{ timeout: 15_000 },
++			);
++			await (await other.browser.newPage()).goto(firstUrl);
++			await announced;
+ 			const inSecond = await acquireTab(names[1]!, relay, { target: "First", timeoutMs: 15_000 });
+ 			expect(browserOf(inSecond.tab.targetId)).not.toBe(browserOf(inFirst.tab.targetId));
+ 			const owned = await acquireTab(names[2]!, relay, { url: `${fixture.origin}/second`, timeoutMs: 15_000 });
 diff --git a/packages/coding-agent/test/tools/model-language-boundary.test.ts b/packages/coding-agent/test/tools/model-language-boundary.test.ts
 new file mode 100644
 index 0000000..3c8d2c6
