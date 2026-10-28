@@ -34,6 +34,15 @@
 - 기존 인증을 사용한 실제 `openai-codex/gpt-5.6-sol` 세션에서 ko/en 각각 쓰기 1회·provider 요청 2회·후속 답변을 확인했습니다. 두 언어 모두 영어 도구 결과가 provider 요청에 포함됐습니다.
 - upstream PR #17203은 Draft 상태에서 최신 main `c3b645c` 기준 4파일 +121/-0의 순수 코어로 축소했습니다(제출 head `e65ae63`). 원본 커밋은 merge 이력에 보존했고 force push하지 않았습니다. 최신 제출 코어의 `bun check`와 동작 검사 5개·24개 단언 및 실제 소비자 실행이 통과했으며 8개 인라인 스레드에 답변했습니다.
 - upstream i18n 수용 의사와 API 범위는 maintainer에게 요청했지만, 답변을 받기 전까지 승인으로 취급하지 않습니다.
+- GitHub의 PR 병합 상태에는 별도 불일치가 남아 있습니다. REST 비교는 제출 head가 현재 base보다 5개 커밋 앞서고 뒤처짐 0개이며 base가 merge-base라고 보고하고, 로컬 조상 검사도 통과합니다. 그러나 PR REST/GraphQL은 `CONFLICTING`/`DIRTY`를 보고합니다. 코드 충돌이 해결됐거나 서버 표시가 정상화됐다고 주장하지 않으며, 이 상태와 maintainer 동의는 미해결로 기록합니다.
+
+## 공개 배포·온라인 설치
+
+- [v18.13.2-ko.4](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.13.2-ko.4)를 게시했습니다. [Windows 릴리스 워크플로](https://github.com/seojihun618-dotcom/omp-korean/actions/runs/40692056769)의 전체 재구성·빌드·실행 검사·설치 보존·롤백 검사가 통과했습니다.
+- 공개 ZIP·SHA256SUMS·release.json·install.ps1 네 자산의 GitHub SHA-256을 확인했습니다. ZIP SHA-256: `5d68378bfd7d202dd6c0c92fc026d54c62767bf0334fa816b878fca0f45914fd`. 로컬 `release/`에도 이 공개 자산을 그대로 저장했습니다.
+- 문서의 실제 `releases/latest/download/install.ps1`로 임시 설치와 실제 `%LOCALAPPDATA%\omp-korean` 재설치를 수행했습니다. 공개 설치기는 로컬 검증 설치기와 CRLF 줄바꿈만 다르며, 그 외 내용은 동일합니다. 기존 병합 언어팩을 바이트 단위로 유지했고 PATH를 변경하지 않았습니다.
+- 공개 실행 파일 SHA-256은 `b07eed8d2b8c0768d703e08e80ee7e6aebb87cd8588c6b4c03f0158cd4af8d9b`이며 실제 설치본과 일치합니다. 재설치 후 실제 실행 파일에서 영어 기본 도움말·한국어 선택·양 언어 smoke를 확인했습니다. 조회 전후 실행 파일·메타데이터·언어팩이 그대로인 `update --check`도 통과했습니다.
+- `update --check`에서 확인한 최신 공식 stable은 18.13.3입니다. 이번 배포는 지정한 18.13.2 기반을 유지하며 18.13.3으로 임의 갱신하지 않았습니다. 이미 실행 중인 OMP에는 재시작 후 새 실행 파일이 적용됩니다.
 
 # 18.13.2-ko.3 (로컬 검증본)
 
