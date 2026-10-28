@@ -46,6 +46,13 @@ jobs:
         shell: powershell
         run: ./scripts/build-release.ps1 -Repository $env:GITHUB_REPOSITORY
 
+      - name: Verify actual installer preservation and rollback
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $manifest = Get-Content release/release.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          ./scripts/test-installer.ps1 -ArchivePath "release/$($manifest.archive)" -ChecksumPath 'release/SHA256SUMS' -ManifestPath 'release/release.json'
+
       - name: Upload build-only artifact
         if: env.RELEASE_TAG == ''
         uses: actions/upload-artifact@v4
