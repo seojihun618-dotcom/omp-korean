@@ -3,6 +3,7 @@
 param(
     [switch]$SkipBuild,
     [string]$BinaryPath,
+    [string]$UpdateKitPath,
     [string]$Repository = $env:GITHUB_REPOSITORY
 )
 
@@ -61,8 +62,8 @@ if ($env:OS -ne 'Windows_NT' -or -not [Environment]::Is64BitProcess -or
 if ($Repository -and $Repository -cnotmatch '^[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*$') {
     throw 'Repository must be a GitHub owner/name.'
 }
-if ($SkipBuild -and -not $BinaryPath) { throw '-SkipBuild requires an explicit -BinaryPath.' }
-if (-not $SkipBuild -and $BinaryPath) { throw '-BinaryPath is only valid with -SkipBuild.' }
+if ($SkipBuild -and (-not $BinaryPath -or -not $UpdateKitPath)) { throw '-SkipBuild requires explicit -BinaryPath and -UpdateKitPath.' }
+if (-not $SkipBuild -and ($BinaryPath -or $UpdateKitPath)) { throw '-BinaryPath and -UpdateKitPath are only valid with -SkipBuild.' }
 $manifestPath = Join-Path $Root 'release.json'
 $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($manifest.version -cnotmatch '^(\d+\.\d+\.\d+)-ko\.\d+$') { throw 'Invalid release version.' }
@@ -87,6 +88,7 @@ $output = Join-Path $Root 'release'
 [void](New-Item -ItemType Directory -Path $stage -Force)
 [void](New-Item -ItemType Directory -Path $output -Force)
 if ($SkipBuild) {
+    $kit = (Resolve-Path -LiteralPath $UpdateKitPath -ErrorAction Stop).Path
     $binary = (Resolve-Path -LiteralPath $BinaryPath -ErrorAction Stop).Path
 } else {
     $bunVersion = Read-Checked 'bun' @('--version')
@@ -151,6 +153,22 @@ if ($SkipBuild) {
     }
     Push-Location $source
     try { Invoke-Checked 'bun' @('scripts/build-localized.ts') } finally { Pop-Location }
+    $kit = Join-Path $work 'update'
+    [void](New-Item -ItemType Directory -Path (Join-Path $kit 'scripts') -Force)
+    [void](New-Item -ItemType Directory -Path (Join-Path $kit 'locales') -Force)
+    Push-Location $source
+    try {
+        Invoke-Checked 'bun' @('scripts/reapply-localization.ts', 'create', '--source', $source, '--base', $manifest.upstreamCommit, '--output', (Join-Path $kit 'reference.json'))
+        Invoke-Checked 'bun' @('build', 'scripts/update-localized.ts', '--target=bun', '--outfile', (Join-Path $kit 'update-localized.js'))
+    } finally { Pop-Location }
+    Copy-Item -LiteralPath (Get-Command bun -ErrorAction Stop).Source -Destination (Join-Path $kit 'bun.exe')
+    foreach ($name in @('update-localized.ts', 'reapply-localization.ts', 'build-localized.ts')) {
+        Copy-Item -LiteralPath (Join-Path $source "scripts/$name") -Destination (Join-Path $kit "scripts/$name")
+    }
+    foreach ($locale in @('ko', 'en')) {
+        Copy-Item -LiteralPath (Join-Path $Root "locales/$locale.json") -Destination (Join-Path $kit "locales/$locale.json")
+    }
+    Copy-Item -LiteralPath (Join-Path $source 'packages/coding-agent/src/cli/localized-update.ts') -Destination (Join-Path $kit 'scripts/localized-update.ts')
     $binary = Join-Path $source 'packages/coding-agent/binaries/omp-windows-x64.exe'
 }
 
@@ -160,6 +178,13 @@ Copy-Item -LiteralPath $binary -Destination (Join-Path $stage 'omp.exe')
 foreach ($relative in @('locales/ko.json', 'locales/en.json', 'LICENSE', 'THIRD-PARTY-NOTICES.txt', 'README.md')) {
     Copy-Item -LiteralPath (Join-Path $Root $relative) -Destination (Join-Path $stage $relative)
 }
+$kitFiles = @('bun.exe', 'update-localized.js', 'reference.json', 'scripts/update-localized.ts', 'scripts/reapply-localization.ts', 'scripts/build-localized.ts', 'scripts/localized-update.ts', 'locales/ko.json', 'locales/en.json')
+foreach ($relative in $kitFiles) {
+    $destination = Join-Path $stage "update/$relative"
+    [void](New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force)
+    Copy-Item -LiteralPath (Join-Path $kit $relative) -Destination $destination
+}
+$packageFiles = @('omp.exe', 'locales/ko.json', 'locales/en.json', 'LICENSE', 'THIRD-PARTY-NOTICES.txt', 'README.md') + @($kitFiles | ForEach-Object { "update/$_" })
 $environmentKeys = @('OMP_LANG', 'OMP_LOCALE_DIR', 'PI_CODING_AGENT_DIR', 'PI_PROFILE')
 $savedEnvironment = @{}
 foreach ($key in $environmentKeys) { $savedEnvironment[$key] = [Environment]::GetEnvironmentVariable($key, 'Process') }
@@ -200,7 +225,7 @@ $zipPath = Join-Path $output $manifest.archive
 $tempZip = Join-Path $work $manifest.archive
 $zip = [IO.Compression.ZipFile]::Open($tempZip, [IO.Compression.ZipArchiveMode]::Create)
 try {
-    foreach ($relative in @('omp.exe', 'locales/ko.json', 'locales/en.json', 'LICENSE', 'THIRD-PARTY-NOTICES.txt', 'README.md')) {
+    foreach ($relative in $packageFiles) {
         $entry = $zip.CreateEntry($relative, [IO.Compression.CompressionLevel]::Optimal)
         $entry.LastWriteTime = [DateTimeOffset]::new(2000, 1, 1, 0, 0, 0, [TimeSpan]::Zero)
         $inputFile = [IO.File]::OpenRead((Join-Path $stage $relative))

@@ -1,0 +1,88 @@
+name: Verify localized source
+
+on:
+  push:
+    branches: ['verify/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-suite:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      OMP_LANG: en
+      OMP_TEST_CONCURRENCY: '4'
+      OMP_TEST_TIMEOUT: '120'
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      CARGO_BUILD_JOBS: '2'
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - name: Reconstruct the exact source under test
+        shell: bash
+        run: |
+          set -euo pipefail
+          commit=$(python -c 'import json; print(json.load(open("release.json"))["upstreamCommit"])')
+          mkdir -p verification/source
+          git -C verification/source init --quiet
+          git -C verification/source remote add origin https://github.com/can1357/oh-my-pi.git
+          git -C verification/source fetch --depth=1 origin "$commit"
+          git -C verification/source checkout --detach FETCH_HEAD
+          git -C verification/source apply --binary "$GITHUB_WORKSPACE/source/omp-language-pack.patch"
+          cp locales/*.json verification/source/packages/utils/src/locales/
+      - name: Prepare Linux test dependencies
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libclang-dev libssl-dev libudev-dev libx11-dev libxkbcommon-dev pkg-config
+      - name: Install pinned workspace dependencies
+        working-directory: verification/source
+        run: bun install --frozen-lockfile --ignore-scripts
+      - name: Verify and install the matching published Linux native addon
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64, hashlib, io, json, pathlib, tarfile, urllib.request
+          manifest = json.load(open('release.json'))
+          package = '@oh-my-pi/pi-natives-linux-x64'
+          version = manifest['upstreamVersion']
+          with urllib.request.urlopen(f'https://registry.npmjs.org/{package}/{version}') as response:
+              metadata = json.load(response)
+          assert metadata['name'] == package and metadata['version'] == version
+          with urllib.request.urlopen(metadata['dist']['tarball']) as response:
+              archive = response.read()
+          actual = 'sha512-' + base64.b64encode(hashlib.sha512(archive).digest()).decode()
+          assert actual == metadata['dist']['integrity']
+          destination = pathlib.Path('verification/source/packages/natives/native')
+          with tarfile.open(fileobj=io.BytesIO(archive), mode='r:gz') as archive_file:
+              for variant in ('baseline', 'modern'):
+                  name = f'pi_natives.linux-x64-{variant}.node'
+                  try:
+                      member = archive_file.getmember('package/' + name)
+                  except KeyError:
+                      if variant == 'baseline':
+                          raise
+                      continue
+                  assert member.isfile()
+                  (destination / name).write_bytes(archive_file.extractfile(member).read())
+          PY
+      - uses: dtolnay/rust-toolchain@nightly-2026-10-06
+        with:
+          components: rustfmt, clippy
+      - uses: taiki-e/install-action@cargo-nextest
+      - name: Generate browser assets used by application imports
+        working-directory: verification/source
+        run: bun run gen:stats && bun --cwd=packages/collab-web run gen:tool-views
+      - name: Check formatting, types and Rust
+        working-directory: verification/source
+        run: bun check
+      - name: Run the complete repository suite
+        working-directory: verification/source
+        run: bun run test

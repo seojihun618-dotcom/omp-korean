@@ -1,8 +1,8 @@
 # OMP Korean — 한국어 언어팩 배포판
 
-Windows x64용 omp 한국어 배포판입니다. 한국어 번역 9,770개를 외부 언어팩으로 제공하며, 한국어·영어 전환과 번역 파일 수정을 지원합니다. 공식 omp가 언어팩을 읽는 것은 아니므로 **언어팩 지원 실행 파일을 함께 설치**합니다.
+Windows x64용 omp 언어팩 배포판입니다. **기본 실행은 영어**이며, `OMP_LANG=ko`로 한국어를 선택할 수 있습니다. 한국어 번역은 편집 가능한 외부 팩으로 제공합니다. 공식 omp가 언어팩을 읽는 것은 아니므로 **언어팩 지원 실행 파일을 함께 설치**합니다.
 
-- 배포 버전: **[18.13.2-ko.2](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.13.2-ko.2)**
+- 배포 버전: **18.13.2-ko.4**
 - 기반 omp: **18.13.2**
 - 지원 환경: **Windows x64 / Windows PowerShell 5.1 이상**
 - 일반 사용자 실행: Bun·Node.js·Git 설치 불필요
@@ -14,13 +14,13 @@ Windows x64용 omp 한국어 배포판입니다. 한국어 번역 9,770개를 �
 
 ### 터미널로 설치
 
-아래 명령은 GitHub Releases의 최신 배포판을 설치합니다. 현재 최신 버전은 **18.13.2-ko.2**입니다.
+공개 배포 저장소의 최신 설치 스크립트:
 
 ```powershell
 irm "https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/install.ps1" | iex
 ```
 
-**Releases에 첨부된 install.ps1**에는 해당 저장소 주소가 들어 있으므로 추가 인수가 필요 없습니다. 원격 스크립트는 실행 전에 내용을 확인하고 신뢰할 수 있는 저장소의 주소만 사용하세요. 체크섬은 다운로드 손상을 검증하며 배포자의 신원을 보증하는 전자서명은 아닙니다.
+GitHub Actions가 생성한 **Releases의 install.ps1**에는 해당 저장소 주소가 들어 있으므로 추가 인수가 필요 없습니다. 원격 스크립트는 실행 전에 내용을 확인하고 신뢰할 수 있는 저장소의 주소만 사용하세요. 체크섬은 다운로드 손상을 검증하며 배포자의 신원을 보증하는 전자서명은 아닙니다.
 
 설치기는 다음 작업만 수행합니다.
 
@@ -47,7 +47,7 @@ omp --help
 
 ### ZIP으로 직접 사용
 
-[최신 배포 ZIP 다운로드](https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/omp-korean-18.13.2-ko.2-windows-x64.zip) 후 압축을 풀고, 해당 폴더에서 실행합니다.
+Releases에서 `omp-korean-18.13.2-ko.4-windows-x64.zip`을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
 
 ```powershell
 .\omp.exe
@@ -66,18 +66,21 @@ omp --help
 └─ update/             번역 기준·업데이트 도구·Bun 런타임
 ```
 
-- 기본 언어는 한국어입니다. 실행 파일 옆의 `locales/ko.json`을 읽습니다.
+- 기본 언어는 영어입니다. `OMP_LANG` 미설정·빈 값·미지원 언어는 영어를 사용하며 언어팩을 읽지 않습니다.
+- `OMP_LANG=ko` 또는 `ko-KR`을 명시하면 실행 파일 옆의 `locales/ko.json`을 비동기로 읽습니다.
 - `ko.json`의 오른쪽 번역 문구만 수정하고 omp를 다시 실행하면 됩니다. 재빌드는 필요 없습니다.
-- 선택한 한국어팩에 없는 항목은 영어 원문으로 표시합니다. 외부 파일이 없으면 내장 한국어팩을 사용합니다.
+- 선택한 한국어팩에 없는 항목은 영어 원문으로 표시합니다. 선택한 파일이 없거나 잘못되었으면 경고 후 영어로 실행합니다. 실행 파일에 숨겨진 내장 한국어팩은 없습니다.
 - `en.json`은 영어 원문 참고 목록입니다. 영어 모드는 코드의 영어 원문을 사용합니다.
 - 키와 `{0}`, `{1}` 같은 자리표시자, JSON 문법을 유지하세요. `\u0004` 뒤의 문맥은 같은 단어의 서로 다른 뜻을 구분합니다.
 - `OMP_LOCALE_DIR`가 이미 설정돼 있으면 그 디렉터리의 언어팩을 우선합니다.
+- 외부 팩을 읽거나 검증할 수 없으면 팩 내용을 출력하지 않고 경고한 뒤 영어로 실행합니다. SDK·worker의 공통 import만으로는 언어팩을 읽지 않습니다.
 
 ```powershell
 $env:OMP_LANG = "en"  # 현재 터미널에서 영어 선택
 omp
 $env:OMP_LANG = "ko"  # 현재 터미널에서 한국어 선택
 omp
+Remove-Item Env:OMP_LANG -ErrorAction SilentlyContinue  # 기본 영어로 복귀
 ```
 
 ## 업데이트와 제거
@@ -119,20 +122,20 @@ build/                       재빌드 작업 폴더, Git 추적 제외
 
 1. 빈 GitHub 저장소를 만들고 이 폴더의 저장소 파일을 올립니다. `.github`와 `.gitignore`도 포함하세요.
 2. GitHub Actions 사용을 허용합니다. 빌드는 Windows 러너에서 수행합니다.
-3. `release.json`과 같은 버전의 태그 **`v18.13.2-ko.2`**을 push합니다.
+3. `release.json`과 같은 버전의 태그 **`v18.13.2-ko.4`**을 push합니다.
 4. 워크플로가 기반 소스 복원 → 포크 패치 → 언어팩 적용 → 빌드·실행 검증 → ZIP·SHA-256 생성 → Releases 게시를 수행합니다.
 5. 게시된 Releases의 설치 스크립트 URL을 사용자에게 안내합니다.
 
 ```powershell
-# 배포용 저장소에서 실행하는 예시입니다.
+# 실제 GitHub 저장소를 만든 뒤 OWNER/REPO를 바꿔 실행합니다.
 git init
 git add .
 git commit -m "Publish Korean language-pack distribution"
 git branch -M main
-git remote add origin https://github.com/seojihun618-dotcom/omp-korean.git
+git remote add origin https://github.com/OWNER/REPO.git
 git push -u origin main
-git tag v18.13.2-ko.2
-git push origin v18.13.2-ko.2
+git tag v18.13.2-ko.4
+git push origin v18.13.2-ko.4
 ```
 
 자동 게시에는 워크플로의 `contents: write` 권한이 필요합니다. 저장소·조직 정책이 이를 차단하면 권한 정책을 확인하세요. 개인 토큰이나 모델 API 키를 저장소에 넣을 필요는 없습니다.
@@ -142,14 +145,14 @@ git push origin v18.13.2-ko.2
 재빌드에는 Windows x64, Git, Windows의 `tar.exe`와 **Bun 1.4.4**가 필요합니다. 고정된 기반 소스와 해당 버전의 네이티브 애드온을 가져와 빌드합니다.
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Repository seojihun618-dotcom/omp-korean
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Repository OWNER/REPO
 ```
 
-결과물은 `release/`에 생성됩니다. 같은 폴더의 ZIP, `SHA256SUMS`, `release.json`, **저장소 주소가 지정된 `install.ps1`**을 하나의 GitHub Release에 함께 첨부하세요. 소스 원본 `install.ps1`이나 저장소가 지정되지 않은 초기 로컬 산출물은 온라인 설치 시 `-Repository seojihun618-dotcom/omp-korean`를 명시해야 합니다. GitHub Actions 또는 위 명령으로 생성한 주소 지정 스크립트를 게시하는 것이 가장 간단합니다.
+결과물은 `release/`에 생성됩니다. 같은 폴더의 ZIP, `SHA256SUMS`, `release.json`, **저장소 주소가 지정된 `install.ps1`**을 하나의 GitHub Release에 함께 첨부하세요. 소스 원본 `install.ps1`이나 저장소가 지정되지 않은 초기 로컬 산출물은 온라인 설치 시 `-Repository OWNER/REPO`를 명시해야 합니다. GitHub Actions 또는 위 명령으로 생성한 주소 지정 스크립트를 게시하는 것이 가장 간단합니다.
 
 ```powershell
 # 내려받은 설치 스크립트 원본을 명시적 저장소로 실행하는 예
-powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Repository seojihun618-dotcom/omp-korean
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Repository OWNER/REPO
 ```
 
 `-ExecutionPolicy Bypass`는 그 PowerShell 프로세스에만 적용합니다. 시스템 실행 정책이나 보안 기능을 영구적으로 바꾸지 않습니다.

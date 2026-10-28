@@ -92,9 +92,9 @@ $DefaultRepository = '' # RELEASE_REPOSITORY
                 if ($seen.ContainsKey($name)) { throw "Duplicate ZIP entry: $name" }
                 $seen[$name] = $true
                 $mode = ($entry.ExternalAttributes -shr 16) -band 0xF000
-                if ($name -ceq 'locales/') {
+                if (@('locales/', 'update/', 'update/scripts/', 'update/locales/') -ccontains $name) {
                     if ($entry.Length -ne 0 -or ($mode -ne 0 -and $mode -ne 0x4000)) {
-                        throw 'Invalid ZIP locales directory entry.'
+                        throw 'Invalid ZIP directory entry.'
                     }
                     continue
                 }
@@ -269,7 +269,13 @@ namespace OmpKoreanInstaller {
     if (Test-Path -LiteralPath (Join-Path $target 'omp-localized.json')) {
         throw 'This is a developer-managed localized install (omp-localized.json exists). Choose another directory; this installer will not overwrite it.'
     }
-    $allowed = @('omp.exe', 'locales/ko.json', 'locales/en.json', 'LICENSE', 'THIRD-PARTY-NOTICES.txt', 'README.md')
+    $allowed = @(
+        'omp.exe', 'locales/ko.json', 'locales/en.json', 'LICENSE', 'THIRD-PARTY-NOTICES.txt', 'README.md',
+        'update/bun.exe', 'update/update-localized.js', 'update/reference.json',
+        'update/scripts/update-localized.ts', 'update/scripts/reapply-localization.ts', 'update/scripts/build-localized.ts',
+        'update/scripts/localized-update.ts',
+        'update/locales/ko.json', 'update/locales/en.json'
+    )
     foreach ($name in $allowed) {
         $path = Join-Path $target $name
         Assert-PlainPath $path
@@ -349,6 +355,7 @@ namespace OmpKoreanInstaller {
         $promoted = New-Object 'System.Collections.Generic.List[string]'
         $createdTarget = -not (Test-Path -LiteralPath $target)
         $createdLocales = -not (Test-Path -LiteralPath (Join-Path $target 'locales'))
+        $createdUpdate = -not (Test-Path -LiteralPath (Join-Path $target 'update'))
         $oldProcessPath = $env:Path
         $pathAttempted = $false
         $oldUserPath = $null
@@ -406,6 +413,11 @@ namespace OmpKoreanInstaller {
                 try { [IO.File]::Move((Join-Path $backup $name), (Join-Path $target $name)) }
                 catch { $rollbackErrors.Add($name + ': ' + $_.Exception.Message) }
             }
+            if ($createdUpdate) {
+                foreach ($directory in @('update/scripts', 'update/locales', 'update')) {
+                    try { [IO.Directory]::Delete((Join-Path $target $directory), $false) } catch { }
+                }
+            }
             if ($createdLocales) {
                 try { [IO.Directory]::Delete((Join-Path $target 'locales'), $false) } catch { }
             }
@@ -424,7 +436,7 @@ namespace OmpKoreanInstaller {
         if (-not $Options['NoPath']) {
             Write-Host 'User and current-process PATH updated. Open a new terminal, especially after irm | iex, then run Get-Command omp.'
         }
-        Write-Host 'Run omp update --check to check compatibility. omp update switches to the official version when no matching Korean build is available; reinstall this distribution to return to Korean.'
+        Write-Host 'Run omp update --check to check for updates. omp update rebuilds the latest stable source with safely matched Korean translations; new or changed text stays English. Keep the update folder beside omp.exe.'
     } finally {
         if ($null -ne $userKey) { $userKey.Dispose() }
         [Net.ServicePointManager]::SecurityProtocol = $oldTls
