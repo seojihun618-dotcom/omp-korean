@@ -73,8 +73,9 @@ jobs:
                   assert member.isfile()
                   (destination / name).write_bytes(archive_file.extractfile(member).read())
           PY
-      - uses: dtolnay/rust-toolchain@nightly-2026-10-06
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: nightly-2026-10-06
           components: rustfmt, clippy
       - uses: taiki-e/install-action@cargo-nextest
       - name: Generate browser assets used by application imports
