@@ -94714,6 +94714,39 @@ index 0000000..8cdad24
 +	}
 +}
 +console.log(`Localized executable built: ${outfile}`);
+diff --git a/scripts/ci-release-publish.test.ts b/scripts/ci-release-publish.test.ts
+index e406047..011c713 100644
+--- a/scripts/ci-release-publish.test.ts
++++ b/scripts/ci-release-publish.test.ts
+@@ -236,28 +236,4 @@ describe("published manifest topology", () => {
+ 			},
+ 		});
+ 	});
+-
+-	it("keeps source-runtime packages on src with only types repointed", async () => {
+-		const pkg = packages.find(entry => entry.dir === "packages/utils");
+-		if (!pkg) throw new Error("utils missing from publish set");
+-
+-		const manifest = await rewriteManifest(pkg, false);
+-		expect(manifest.files).toEqual(expect.arrayContaining(["LICENSE", "THIRD-PARTY-NOTICES.txt"]));
+-		expect(manifest.main).toBe("./src/index.ts");
+-		expect(manifest.exports).toEqual({
+-			".": {
+-				types: "./dist/types/index.d.ts",
+-				import: "./src/index.ts",
+-			},
+-			"./*": {
+-				types: "./dist/types/*.d.ts",
+-				import: "./src/*.ts",
+-			},
+-			"./*.js": "./src/*.ts",
+-			"./ar": {
+-				types: "./dist/types/ar/index.d.ts",
+-				import: "./src/ar/index.ts",
+-			},
+-		});
+-	});
+ });
 diff --git a/scripts/extract-locales.ts b/scripts/extract-locales.ts
 new file mode 100644
 index 0000000..26401be
@@ -96399,16 +96432,17 @@ index 0000000..f482df8
 +}
 diff --git a/scripts/reapply-localization.test.ts b/scripts/reapply-localization.test.ts
 new file mode 100644
-index 0000000..ba22fc8
+index 0000000..47862d7
 --- /dev/null
 +++ b/scripts/reapply-localization.test.ts
-@@ -0,0 +1,446 @@
+@@ -0,0 +1,481 @@
 +import { describe, expect, it } from "bun:test";
 +import { execFileSync } from "node:child_process";
 +import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 +import { tmpdir } from "node:os";
 +import { dirname, resolve } from "node:path";
 +import { ts } from "ts-morph";
++import { createTranslator } from "../packages/utils/src/i18n-core";
 +import {
 +	applyLocalizationReference,
 +	createLocalizationReference,
@@ -96642,6 +96676,40 @@ index 0000000..ba22fc8
 +});
 +
 +describe("reviewed call-site localization reapplication", () => {
++	it("preserves translations across trailing-comma formatting without confusing array elisions", () => {
++		const base = 'export function render() { return ["Ready", 0]; }';
++		const localized =
++			'import { t } from "@oh-my-pi/pi-utils/i18n";\nexport function render() { return [t("Ready"), 0,]; }';
++		function run(source: string): unknown[] {
++			const compiled = ts.transpileModule(source, {
++				compilerOptions: { module: ts.ModuleKind.CommonJS },
++			}).outputText;
++			const exported: { render?: () => unknown[] } = {};
++			new Function("exports", "require", compiled)(exported, (module: string) => {
++				if (module !== "@oh-my-pi/pi-utils/i18n") throw new Error(`Unexpected import: ${module}`);
++				return { t: createTranslator({ Ready: "준비됨" }) };
++			});
++			return exported.render!();
++		}
++		fixture(base, localized, 'export function render() { return ["Ready", 0,]; }', ({ root, reference, output }) => {
++			applyLocalizationReference(root, reference);
++			expect(run(output())).toEqual(["준비됨", 0]);
++		});
++		fixture(
++			base,
++			localized,
++			'export function render() { return ["Ready", , 0,]; }',
++			({ root, reference, output }) => {
++				applyLocalizationReference(root, reference);
++				const result = run(output());
++				expect(result).toHaveLength(3);
++				expect(result[0]).toBe("Ready");
++				expect(Object.hasOwn(result, 1)).toBe(false);
++				expect(result[2]).toBe(0);
++			},
++		);
++	});
++
 +	it("translates only the reviewed named usage and preserves new logic, types, property keys and protocol IDs", () => {
 +		const base = `export function render() { return paint("Ready"); }\nexport function protocol() { return send("Ready"); }\ntype State = "Ready";\nconst keys = { "Ready": 1 };\n`;
 +		const localized = `import { t as localize } from "@oh-my-pi/pi-utils/i18n";\nexport function render() { return paint(localize("Ready\\u0004status")); }\nexport function protocol() { return send("Ready"); }\ntype State = "Ready";\nconst keys = { "Ready": 1 };\n`;
@@ -96851,10 +96919,10 @@ index 0000000..ba22fc8
 +});
 diff --git a/scripts/reapply-localization.ts b/scripts/reapply-localization.ts
 new file mode 100644
-index 0000000..f34674e
+index 0000000..7d041b7
 --- /dev/null
 +++ b/scripts/reapply-localization.ts
-@@ -0,0 +1,613 @@
+@@ -0,0 +1,621 @@
 +#!/usr/bin/env bun
 +import { execFileSync } from "node:child_process";
 +import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -97033,7 +97101,15 @@ index 0000000..f34674e
 +				current.templateSpans.map(span => shape(span.expression)),
 +			];
 +		const children = current.getChildren();
-+		return children.length ? [current.kind, children.map(shape)] : [current.kind, current.getText()];
++		if (!children.length) return [current.kind, current.getText()];
++		// Formatting may add a trailing comma; array holes remain OmittedExpression nodes.
++		const end =
++			current.kind === ts.SyntaxKind.SyntaxList && children.at(-1)?.kind === ts.SyntaxKind.CommaToken
++				? children.length - 1
++				: children.length;
++		const items: unknown[] = [];
++		for (let index = 0; index < end; index++) items.push(shape(children[index]));
++		return [current.kind, items];
 +	}
 +	return JSON.stringify(shape(node));
 +}

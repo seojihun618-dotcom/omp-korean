@@ -78,12 +78,22 @@ jobs:
           toolchain: nightly-2026-10-06
           components: rustfmt, clippy
       - uses: taiki-e/install-action@cargo-nextest
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: verification/source -> target
+          cache-on-failure: true
       - name: Generate browser assets used by application imports
+        id: assets
         working-directory: verification/source
         run: bun run gen:stats && bun --cwd=packages/collab-web run gen:tool-views
       - name: Check formatting, types and Rust
         working-directory: verification/source
         run: bun check
+      - name: Run all repository script tests
+        if: ${{ !cancelled() && steps.assets.outcome == 'success' }}
+        working-directory: verification/source
+        run: bun run test:scripts
       - name: Run the complete repository suite
+        if: ${{ !cancelled() && steps.assets.outcome == 'success' }}
         working-directory: verification/source
         run: bun run test
