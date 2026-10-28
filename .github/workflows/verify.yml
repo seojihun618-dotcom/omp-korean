@@ -93,6 +93,12 @@ jobs:
         if: ${{ !cancelled() && steps.assets.outcome == 'success' }}
         working-directory: verification/source
         run: bun run test:scripts
+      - name: Compile Rust test binaries before the chunk watchdog
+        if: ${{ !cancelled() && steps.assets.outcome == 'success' }}
+        working-directory: verification/source
+        # Keep the repository's 600s test watchdog; cold compilation is not a hung test.
+        # Workspace exclusions match scripts/run-rs-task.ts.
+        run: cargo nextest run --workspace --exclude brush-core --exclude brush-parser --exclude cfg_aliases --exclude napi --no-run
       - name: Run the complete repository suite
         if: ${{ !cancelled() && steps.assets.outcome == 'success' }}
         working-directory: verification/source

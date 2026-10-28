@@ -113,6 +113,7 @@ locales/                     편집 가능한 언어팩
 source/omp-language-pack.patch  기반 소스에 적용할 전체 포크 패치
 scripts/                     빌드·검증 도구
 .github/workflows/release.yml 자동 릴리스 작업
+.github/workflows/verify.yml  고정 소스 재구성·전체 검사·TS/Rust 테스트
 release/                     Releases에 첨부할 ZIP·체크섬 등, Git 추적 제외
 build/                       재빌드 작업 폴더, Git 추적 제외
 ```
