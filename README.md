@@ -2,25 +2,36 @@
 
 Windows x64용 omp 언어팩 배포판입니다. **기본 실행은 영어**이며, `OMP_LANG=ko`로 한국어를 선택할 수 있습니다. 한국어 번역은 편집 가능한 외부 팩으로 제공합니다. 공식 omp가 언어팩을 읽는 것은 아니므로 **언어팩 지원 실행 파일을 함께 설치**합니다.
 
-- 배포 버전: **18.13.2-ko.4**
-- 기반 omp: **18.13.2**
+- 최신 배포: **[18.13.3-ko.2](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.13.3-ko.2)**
+- 기반 omp: **18.13.3**
 - 지원 환경: **Windows x64 / Windows PowerShell 5.1 이상**
 - 일반 사용자 실행: Bun·Node.js·Git 설치 불필요
 - 원본 프로젝트: <https://github.com/can1357/oh-my-pi>
 
 공식 프로젝트의 한국어 지원 릴리스가 아닌 별도 포크입니다. 모델 답변, 외부 도구 출력과 서비스 오류 원문까지 자동 번역하지는 않습니다.
 
+## 이번 버전의 주요 변경
+
+**실행 중 `/language ko`·`/language en`으로 언어를 바꾸고 저장된 현재 대화를 이어갈 수 있습니다.**
+
+- 공식 OMP **18.13.3** 기반으로 갱신했습니다.
+- 한국어 언어팩 **9,792개**: 설정 계층, 메모 유지·버리기, 세션 이름 변경, 사용량 초기화와 언어 전환 안내를 보강했습니다.
+- 다음 업데이트에서도 언어 명령과 재시작 시 언어 전달을 유지하며, 주석에 따른 코드 삽입 순서 문제를 수정했습니다.
+- 원본의 F2 세션 이름 변경, 주석 초안 보존, 사용량 카운트다운과 모델·검색·대화 안정성 개선을 포함합니다.
+
+[이번 버전 변경 사항과 검증 범위](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.13.3-ko.2) · [최신 Windows x64 ZIP 다운로드](https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/omp-korean-18.13.3-ko.2-windows-x64.zip)
+
 ## 사용자가 설치하는 방법
 
 ### 터미널로 설치
 
-공개 배포 저장소의 최신 설치 스크립트:
+아래 명령은 최신 공개 릴리즈를 설치합니다. 현재 최신 배포는 **18.13.3-ko.2**입니다.
 
 ```powershell
 irm "https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/install.ps1" | iex
 ```
 
-GitHub Actions가 생성한 **Releases의 install.ps1**에는 해당 저장소 주소가 들어 있으므로 추가 인수가 필요 없습니다. 원격 스크립트는 실행 전에 내용을 확인하고 신뢰할 수 있는 저장소의 주소만 사용하세요. 체크섬은 다운로드 손상을 검증하며 배포자의 신원을 보증하는 전자서명은 아닙니다.
+**Releases에 첨부된 install.ps1**에는 해당 저장소 주소가 들어 있으므로 추가 인수가 필요 없습니다. 원격 스크립트는 실행 전에 내용을 확인하고 신뢰할 수 있는 저장소의 주소만 사용하세요. 체크섬은 다운로드 손상을 검증하며 배포자의 신원을 보증하는 전자서명은 아닙니다.
 
 설치기는 다음 작업만 수행합니다.
 
@@ -47,7 +58,7 @@ omp --help
 
 ### ZIP으로 직접 사용
 
-Releases에서 `omp-korean-18.13.2-ko.4-windows-x64.zip`을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
+[최신 Windows x64 ZIP](https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/omp-korean-18.13.3-ko.2-windows-x64.zip)을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
 
 ```powershell
 .\omp.exe
@@ -75,6 +86,17 @@ Releases에서 `omp-korean-18.13.2-ko.4-windows-x64.zip`을 내려받아 압축�
 - ko.4에서는 파일·함수에 종속된 일부 문맥 키를 의미 기반으로 교체했습니다. 이전 `ko.json`은 자동으로 덮어쓰지 않으므로, `update/locales/ko.json`의 새 키를 본인 수정본에 비교·병합하세요. 이전 키를 조회하는 호환 별칭은 없습니다.
 - `OMP_LOCALE_DIR`가 이미 설정돼 있으면 그 디렉터리의 언어팩을 우선합니다.
 - 외부 팩을 읽거나 검증할 수 없으면 팩 내용을 출력하지 않고 경고한 뒤 영어로 실행합니다. SDK·worker의 공통 import만으로는 언어팩을 읽지 않습니다.
+
+실행 중에는 입력창에 다음 명령을 입력할 수 있습니다.
+
+```text
+/language ko
+/language en
+```
+
+명령을 실행하면 OMP가 자동으로 재시작되며 저장된 현재 대화를 재개합니다. 시작할 때 지정한 실행 옵션도 유지합니다. `/language` 자동완성에서 `ko`·`en`을 선택할 수 있으며, 다른 값이나 추가 인수는 사용법만 표시합니다. 이 명령은 대화형 TUI용이며 모델 답변이나 과거 메시지를 번역하지 않습니다.
+
+언어 선택은 재시작된 OMP 프로세스에 적용되며 사용자 환경변수나 설정 파일에는 저장하지 않습니다. OMP를 완전히 종료하고 새로 실행하면 터미널의 `OMP_LANG` 값 또는 기본 영어를 다시 사용합니다. 한국어팩을 읽을 수 없으면 기존과 같이 경고 후 영어로 실행합니다.
 
 ```powershell
 $env:OMP_LANG = "en"  # 현재 터미널에서 영어 선택
@@ -124,20 +146,20 @@ build/                       재빌드 작업 폴더, Git 추적 제외
 
 1. 빈 GitHub 저장소를 만들고 이 폴더의 저장소 파일을 올립니다. `.github`와 `.gitignore`도 포함하세요.
 2. GitHub Actions 사용을 허용합니다. 빌드는 Windows 러너에서 수행합니다.
-3. `release.json`과 같은 버전의 태그 **`v18.13.2-ko.4`**을 push합니다.
+3. `release.json`과 같은 버전의 태그 **`v18.13.3-ko.2`**을 push합니다.
 4. 워크플로가 기반 소스 복원 → 포크 패치 → 언어팩 적용 → 빌드·실행 검증 → ZIP·SHA-256 생성 → Releases 게시를 수행합니다.
 5. 게시된 Releases의 설치 스크립트 URL을 사용자에게 안내합니다.
 
 ```powershell
-# 실제 GitHub 저장소를 만든 뒤 OWNER/REPO를 바꿔 실행합니다.
+# 배포용 저장소에서 실행하는 예시입니다.
 git init
 git add .
 git commit -m "Publish Korean language-pack distribution"
 git branch -M main
-git remote add origin https://github.com/OWNER/REPO.git
+git remote add origin https://github.com/seojihun618-dotcom/omp-korean.git
 git push -u origin main
-git tag v18.13.2-ko.4
-git push origin v18.13.2-ko.4
+git tag v18.13.3-ko.2
+git push origin v18.13.3-ko.2
 ```
 
 자동 게시에는 워크플로의 `contents: write` 권한이 필요합니다. 저장소·조직 정책이 이를 차단하면 권한 정책을 확인하세요. 개인 토큰이나 모델 API 키를 저장소에 넣을 필요는 없습니다.
@@ -147,14 +169,14 @@ git push origin v18.13.2-ko.4
 재빌드에는 Windows x64, Git, Windows의 `tar.exe`와 **Bun 1.4.4**가 필요합니다. 고정된 기반 소스와 해당 버전의 네이티브 애드온을 가져와 빌드합니다.
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Repository OWNER/REPO
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Repository seojihun618-dotcom/omp-korean
 ```
 
-결과물은 `release/`에 생성됩니다. 같은 폴더의 ZIP, `SHA256SUMS`, `release.json`, **저장소 주소가 지정된 `install.ps1`**을 하나의 GitHub Release에 함께 첨부하세요. 소스 원본 `install.ps1`이나 저장소가 지정되지 않은 초기 로컬 산출물은 온라인 설치 시 `-Repository OWNER/REPO`를 명시해야 합니다. GitHub Actions 또는 위 명령으로 생성한 주소 지정 스크립트를 게시하는 것이 가장 간단합니다.
+결과물은 `release/`에 생성됩니다. 같은 폴더의 ZIP, `SHA256SUMS`, `release.json`, **저장소 주소가 지정된 `install.ps1`**을 하나의 GitHub Release에 함께 첨부하세요. 소스 원본 `install.ps1`이나 저장소가 지정되지 않은 초기 로컬 산출물은 온라인 설치 시 `-Repository seojihun618-dotcom/omp-korean`를 명시해야 합니다. GitHub Actions 또는 위 명령으로 생성한 주소 지정 스크립트를 게시하는 것이 가장 간단합니다.
 
 ```powershell
 # 내려받은 설치 스크립트 원본을 명시적 저장소로 실행하는 예
-powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Repository OWNER/REPO
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Repository seojihun618-dotcom/omp-korean
 ```
 
 `-ExecutionPolicy Bypass`는 그 PowerShell 프로세스에만 적용합니다. 시스템 실행 정책이나 보안 기능을 영구적으로 바꾸지 않습니다.
