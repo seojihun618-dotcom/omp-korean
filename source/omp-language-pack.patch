@@ -43052,10 +43052,10 @@ index 422ad11..ac123f8 100644
  /** Deterministic, render-time-independent timestamp: UTC `YYYY-MM-DD HH:MM`. */
 diff --git a/packages/coding-agent/test/cli/localized-update.test.ts b/packages/coding-agent/test/cli/localized-update.test.ts
 new file mode 100644
-index 0000000..0ab605f
+index 0000000..c52f287
 --- /dev/null
 +++ b/packages/coding-agent/test/cli/localized-update.test.ts
-@@ -0,0 +1,226 @@
+@@ -0,0 +1,228 @@
 +import { afterEach, describe, expect, it } from "bun:test";
 +import * as fs from "node:fs/promises";
 +import * as os from "node:os";
@@ -43213,7 +43213,9 @@ index 0000000..0ab605f
 +			expect(result.requests).toEqual(["https://api.github.com/repos/can1357/oh-my-pi/releases/latest"]);
 +			expect(result.spawned).toEqual([]);
 +			expect(result.output).toContain("upstream stable: 999.0.0");
-+			expect(await Bun.file(path.join(result.dir, "update/bun.exe")).exists()).toBe(false);
++			expect(
++				await Bun.file(path.join(result.dir, "update", process.platform === "win32" ? "bun.exe" : "bun")).exists(),
++			).toBe(false);
 +			await expectRetained(result, portable);
 +		});
 +
@@ -94817,12 +94819,12 @@ index 749459e..77f8308 100644
  });
 diff --git a/packages/utils/test/i18n.test.ts b/packages/utils/test/i18n.test.ts
 new file mode 100644
-index 0000000..6c241a9
+index 0000000..6f4a50e
 --- /dev/null
 +++ b/packages/utils/test/i18n.test.ts
-@@ -0,0 +1,202 @@
+@@ -0,0 +1,237 @@
 +import { describe, expect, it } from "bun:test";
-+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
++import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 +import { tmpdir } from "node:os";
 +import { join } from "node:path";
 +import { createTranslator } from "../src/i18n-core";
@@ -94969,6 +94971,41 @@ index 0000000..6c241a9
 +		expect(child.stderr.toString()).toBe("");
 +	});
 +
++	it("uses packs beside the executable only for compiled runs", () => {
++		const directory = mkdtempSync(join(tmpdir(), "omp-packaged-language-"));
++		try {
++			const runtime = join(directory, process.platform === "win32" ? "bun.exe" : "bun");
++			copyFileSync(process.execPath, runtime);
++			if (process.platform !== "win32") chmodSync(runtime, 0o755);
++			mkdirSync(join(directory, "locales"));
++			writeFileSync(join(directory, "locales/ko.json"), '{"Ready":"PACKAGED_EXTERNAL_TRANSLATION"}');
++			const modulePath = new URL("../src/i18n.ts", import.meta.url).href;
++			const script = `import {initializeI18n, getLanguage, t} from ${JSON.stringify(modulePath)};
++await initializeI18n();
++console.log(JSON.stringify([getLanguage(), t("Ready")]));`;
++			for (const compiled of [undefined, "true"]) {
++				const child = Bun.spawnSync([runtime, "-e", script], {
++					env: { ...process.env, OMP_LANG: "ko", OMP_LOCALE_DIR: undefined, PI_COMPILED: compiled },
++				});
++				expect(child.exitCode, child.stderr.toString()).toBe(0);
++				expect(JSON.parse(child.stdout.toString())).toEqual([
++					"ko",
++					compiled ? "PACKAGED_EXTERNAL_TRANSLATION" : "준비 완료",
++				]);
++				expect(child.stderr.toString()).toBe("");
++			}
++			rmSync(join(directory, "locales/ko.json"));
++			const missing = Bun.spawnSync([runtime, "-e", script], {
++				env: { ...process.env, OMP_LANG: "ko", OMP_LOCALE_DIR: undefined, PI_COMPILED: "true" },
++			});
++			expect(missing.exitCode).toBe(0);
++			expect(JSON.parse(missing.stdout.toString())).toEqual(["en", "Ready"]);
++			expect(missing.stderr.toString()).toContain("using English");
++		} finally {
++			rmSync(directory, { recursive: true, force: true });
++		}
++	}, 30_000);
++
 +	it("falls back to English for missing or unreadable explicitly selected assets without a bundled fallback", () => {
 +		const directory = mkdtempSync(join(tmpdir(), "omp-language-missing-"));
 +		try {
@@ -95025,10 +95062,10 @@ index 0000000..6c241a9
 +});
 diff --git a/scripts/build-localized.ts b/scripts/build-localized.ts
 new file mode 100644
-index 0000000..8cdad24
+index 0000000..91fdf8e
 --- /dev/null
 +++ b/scripts/build-localized.ts
-@@ -0,0 +1,58 @@
+@@ -0,0 +1,81 @@
 +#!/usr/bin/env bun
 +import * as fs from "node:fs/promises";
 +import { createRequire } from "node:module";
@@ -95037,10 +95074,14 @@ index 0000000..8cdad24
 +import { compileCodingAgent } from "../packages/coding-agent/scripts/compile-binary";
 +
 +const repoRoot = path.resolve(import.meta.dir, "..");
-+const outfile = path.join(repoRoot, "packages/coding-agent/binaries/omp-windows-x64.exe");
-+if (process.platform !== "win32" || process.arch !== "x64") {
-+	throw new Error("The localized executable builder supports Windows x64 only");
++if (
++	!(process.platform === "win32" && process.arch === "x64") &&
++	!(process.platform === "darwin" && (process.arch === "arm64" || process.arch === "x64"))
++) {
++	throw new Error("The localized executable builder supports Windows x64 and macOS arm64/x64 only");
 +}
++const filename = process.platform === "win32" ? "omp-windows-x64.exe" : `omp-darwin-${process.arch}`;
++const outfile = path.join(repoRoot, "packages/coding-agent/binaries", filename);
 +const transformers: unknown = createRequire(import.meta.url)("@huggingface/transformers/package.json");
 +if (
 +	typeof transformers !== "object" ||
@@ -95052,21 +95093,26 @@ index 0000000..8cdad24
 +}
 +
 +async function generate(args: string[]): Promise<void> {
-+	const child = Bun.spawn([process.execPath, ...args], {
++	await run([process.execPath, ...args]);
++}
++
++async function run(args: string[]): Promise<void> {
++	const child = Bun.spawn(args, {
 +		cwd: repoRoot,
 +		stdout: "inherit",
 +		stderr: "inherit",
 +		stdin: "ignore",
 +	});
-+	if ((await child.exited) !== 0) throw new Error(`Generation failed: ${args.join(" ")}`);
++	if ((await child.exited) !== 0) throw new Error(`Command failed: ${args.join(" ")}`);
 +}
 +
 +await fs.mkdir(path.dirname(outfile), { recursive: true });
 +// Bun 1.4.4 cannot copy a compiler runtime whose executablePath contains non-ASCII characters.
 +const runtimeDirectory = await fs.mkdtemp(path.join(tmpdir(), "omp-compiler-"));
-+const runtime = path.join(runtimeDirectory, "bun.exe");
++const runtime = path.join(runtimeDirectory, process.platform === "win32" ? "bun.exe" : "bun");
 +try {
 +	await fs.copyFile(process.execPath, runtime);
++	if (process.platform !== "win32") await fs.chmod(runtime, 0o755);
 +	await generate(["run", "gen:stats"]);
 +	await generate(["--cwd=packages/collab-web", "run", "gen:tool-views"]);
 +	await compileCodingAgent({
@@ -95078,7 +95124,21 @@ index 0000000..8cdad24
 +		// Use the bundled runtime without downloading a separate compiler target.
 +		executablePath: runtime,
 +		minifyIdentifiers: true,
++		skipBuiltinCodesign: process.platform === "darwin",
 +	});
++	if (process.platform === "darwin") {
++		await fs.chmod(outfile, 0o755);
++		// Match upstream's local build signing so the embedded Bun runtime can use JIT.
++		await run([
++			"codesign",
++			"--force",
++			"--sign",
++			"-",
++			"--entitlements",
++			path.join(repoRoot, "scripts/macos-entitlements.plist"),
++			outfile,
++		]);
++	}
 +} finally {
 +	try {
 +		await generate(["run", "gen:stats:reset"]);
@@ -98272,10 +98332,10 @@ index 0000000..2dc3c46
 +}
 diff --git a/scripts/update-localized.test.ts b/scripts/update-localized.test.ts
 new file mode 100644
-index 0000000..f81f29b
+index 0000000..66e2f53
 --- /dev/null
 +++ b/scripts/update-localized.test.ts
-@@ -0,0 +1,477 @@
+@@ -0,0 +1,487 @@
 +import { describe, expect, it } from "bun:test";
 +import { execFileSync } from "node:child_process";
 +import * as fs from "node:fs/promises";
@@ -98292,12 +98352,17 @@ index 0000000..f81f29b
 +	verifyLanguageProbe,
 +} from "./update-localized";
 +
++const executableName = process.platform === "win32" ? "omp.exe" : "omp";
++const supportedHost =
++	(process.platform === "win32" && process.arch === "x64") ||
++	(process.platform === "darwin" && (process.arch === "arm64" || process.arch === "x64"));
++
 +const metadataPath = path.resolve("test-install", "omp-localized.json");
 +const metadata = {
 +	schemaVersion: 1,
 +	repoRoot: path.resolve("test-source"),
-+	bunPath: path.resolve("test-tools", "bun.exe"),
-+	executablePath: path.resolve("test-install", "omp.exe"),
++	bunPath: path.resolve("test-tools", process.platform === "win32" ? "bun.exe" : "bun"),
++	executablePath: path.resolve("test-install", executableName),
 +	localeDir: path.resolve("test-install", "locales"),
 +	upstreamBase: "a".repeat(40),
 +	version: "18.13.0",
@@ -98369,13 +98434,13 @@ index 0000000..f81f29b
 +	it("keeps checks read-only and refuses downgrades even with --force", async () => {
 +		const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-update-check-"));
 +		try {
-+			const executablePath = path.join(directory, "omp.exe");
++			const executablePath = path.join(directory, executableName);
 +			const metadataPath = path.join(directory, "omp-localized.json");
 +			const content = JSON.stringify({ ...metadata, executablePath });
 +			await fs.writeFile(executablePath, "Korean executable");
 +			await fs.writeFile(metadataPath, content);
 +			await updateLocalized(["--metadata", metadataPath, "--version", "18.13.1", "--check"]);
-+			expect((await fs.readdir(directory)).sort()).toEqual(["omp-localized.json", "omp.exe"]);
++			expect((await fs.readdir(directory)).sort()).toEqual(["omp-localized.json", executableName].sort());
 +			await expect(updateLocalized(["--metadata", metadataPath, "--version", "0.0.1", "--force"])).rejects.toThrow(
 +				"downgrade",
 +			);
@@ -98604,12 +98669,12 @@ index 0000000..f81f29b
 +		}
 +	});
 +
-+	it.skipIf(process.platform !== "win32" || process.arch !== "x64")(
++	it.skipIf(!supportedHost)(
 +		"retains the binary, metadata and custom locales when source preparation fails",
 +		async () => {
 +			const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-source-failure-"));
 +			try {
-+				const executablePath = path.join(directory, "omp.exe");
++				const executablePath = path.join(directory, executableName);
 +				const metadataPath = path.join(directory, "omp-localized.json");
 +				const localeDir = path.join(directory, "locales");
 +				const kit = path.join(directory, "update");
@@ -98641,6 +98706,7 @@ index 0000000..f81f29b
 +					'{"USAGE":"My customized Korean translation"}',
 +				);
 +				expect(await Bun.file(`${metadataPath}.update-lock`).exists()).toBe(false);
++				expect((await fs.readdir(path.join(directory, "updates"))).length).toBe(1);
 +			} finally {
 +				await fs.rm(directory, { recursive: true, force: true });
 +			}
@@ -98658,7 +98724,7 @@ index 0000000..f81f29b
 +	for (const failure of ["none", "verification", "metadata"]) {
 +		it(`preserves the installation transaction when failure is ${failure}`, async () => {
 +			const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-localized-transaction-"));
-+			const executablePath = path.join(directory, "omp.exe");
++			const executablePath = path.join(directory, executableName);
 +			const stagedPath = path.join(directory, "omp.new");
 +			const backupPath = path.join(directory, "omp.bak");
 +			const metadataPath = path.join(directory, "omp-localized.json");
@@ -98699,11 +98765,11 @@ index 0000000..f81f29b
 +	}
 +
 +	for (const failVerification of [false, true]) {
-+		it.skipIf(process.platform !== "win32")(
-+			`${failVerification ? "rolls back" : "installs"} while the previous Windows executable is still running`,
++		it.skipIf(!supportedHost)(
++			`${failVerification ? "rolls back" : "installs"} while the previous native executable is still running`,
 +			async () => {
 +				const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-localized-live-"));
-+				const executablePath = path.join(directory, "omp.exe");
++				const executablePath = path.join(directory, executableName);
 +				const stagedPath = path.join(directory, "omp.new");
 +				const backupPath = path.join(directory, "omp.bak");
 +				const metadataPath = path.join(directory, "omp-localized.json");
@@ -98712,6 +98778,10 @@ index 0000000..f81f29b
 +				try {
 +					await fs.copyFile(process.execPath, executablePath);
 +					await fs.copyFile(process.execPath, stagedPath);
++					if (process.platform !== "win32") {
++						await fs.chmod(executablePath, 0o755);
++						await fs.chmod(stagedPath, 0o755);
++					}
 +					await fs.writeFile(metadataPath, "old metadata");
 +					await fs.writeFile(stagedMetadataPath, "new metadata");
 +					live = Bun.spawn([executablePath, "-e", 'await Bun.write(Bun.stdout, "1"); await Bun.stdin.text()'], {
@@ -98755,10 +98825,10 @@ index 0000000..f81f29b
 +});
 diff --git a/scripts/update-localized.ts b/scripts/update-localized.ts
 new file mode 100644
-index 0000000..020e368
+index 0000000..79b5200
 --- /dev/null
 +++ b/scripts/update-localized.ts
-@@ -0,0 +1,540 @@
+@@ -0,0 +1,546 @@
 +#!/usr/bin/env bun
 +import { createHash, randomUUID } from "node:crypto";
 +import * as fs from "node:fs/promises";
@@ -99205,8 +99275,11 @@ index 0000000..020e368
 +		console.log("Localized installation is already up to date. Use --force to rebuild.");
 +		return;
 +	}
-+	if (process.platform !== "win32" || process.arch !== "x64") {
-+		throw new Error("This localized source installer currently supports Windows x64 only");
++	if (
++		!(process.platform === "win32" && process.arch === "x64") &&
++		!(process.platform === "darwin" && (process.arch === "arm64" || process.arch === "x64"))
++	) {
++		throw new Error("Localized source updates support Windows x64 and macOS arm64/x64 only");
 +	}
 +	const lockPath = `${metadataPath}.update-lock`;
 +	const lock = await fs.open(lockPath, "wx");
@@ -99261,7 +99334,9 @@ index 0000000..020e368
 +		);
 +		await installNative(candidate, metadata, options.offline);
 +		await command([metadata.bunPath, "scripts/build-localized.ts"], candidate, env);
-+		const binary = path.join(candidate, "packages/coding-agent/binaries/omp-windows-x64.exe");
++		const filename = process.platform === "win32" ? "omp-windows-x64.exe" : `omp-darwin-${process.arch}`;
++		const binary = path.join(candidate, "packages/coding-agent/binaries", filename);
++		if (process.platform !== "win32") await fs.chmod(binary, 0o755);
 +		await verifyBinary(binary, version, metadata, transaction);
 +		const suffix = randomUUID();
 +		const staged = `${metadata.executablePath}.${suffix}.new`;
@@ -99270,6 +99345,7 @@ index 0000000..020e368
 +		const { upstreamBase: _legacyBase, ...current } = metadata;
 +		const next = { ...current, repoRoot: candidate, version };
 +		await fs.copyFile(binary, staged);
++		if (process.platform !== "win32") await fs.chmod(staged, 0o755);
 +		await fs.writeFile(stagedMetadata, `${JSON.stringify(next, null, 2)}\n`);
 +		if (originalMetadata) await fs.writeFile(path.join(transaction, "previous-omp-localized.json"), originalMetadata);
 +		await replaceLocalizedExecutable({

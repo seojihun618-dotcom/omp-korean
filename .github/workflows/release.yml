@@ -1,4 +1,4 @@
-name: Windows x64 release
+name: Windows and macOS release
 
 on:
   push:
@@ -7,55 +7,45 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing v<release.json.version> tag to publish; leave empty for build-only artifact'
+        description: 'Existing v<release.json.version> tag to publish; leave empty for build-only artifacts'
         required: false
         type: string
 
 permissions:
   contents: read
 
+env:
+  RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+
 jobs:
-  release:
+  windows:
     runs-on: windows-2022
-    permissions:
-      contents: write
-    env:
-      RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag || github.ref }}
           persist-credentials: false
-
       - name: Validate release metadata and tag
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
           $manifest = Get-Content release.json -Raw -Encoding UTF8 | ConvertFrom-Json
           if ($manifest.version -cnotmatch '^\d+\.\d+\.\d+-ko\.\d+$') { throw 'Invalid release version.' }
-          if ($env:RELEASE_TAG -and $env:RELEASE_TAG -cne "v$($manifest.version)") {
-            throw "Tag must equal v$($manifest.version), not $env:RELEASE_TAG."
-          }
+          if ($env:RELEASE_TAG -and $env:RELEASE_TAG -cne "v$($manifest.version)") { throw 'Tag must equal the manifest version.' }
           if ($manifest.bunVersion -cne '1.4.4') { throw 'Workflow and manifest must both pin Bun 1.4.4.' }
-
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.4.4'
-
       - name: Reconstruct, build, smoke and package
         shell: powershell
         run: ./scripts/build-release.ps1 -Repository $env:GITHUB_REPOSITORY
-
       - name: Verify actual installer preservation and rollback
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
           $manifest = Get-Content release/release.json -Raw -Encoding UTF8 | ConvertFrom-Json
           ./scripts/test-installer.ps1 -ArchivePath "release/$($manifest.archive)" -ChecksumPath 'release/SHA256SUMS' -ManifestPath 'release/release.json'
-
-      - name: Upload build-only artifact
-        if: env.RELEASE_TAG == ''
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: omp-korean-windows-x64
           path: |
@@ -65,14 +55,70 @@ jobs:
             release/install.ps1
           if-no-files-found: error
 
-      - name: Publish tag release
-        if: env.RELEASE_TAG != ''
-        shell: powershell
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - name: Validate native runner and release tag
+        env:
+          EXPECTED_ARCH: ${{ matrix.arch }}
+        run: |
+          bun -e 'const m=await Bun.file("release.json").json(); if(process.platform!=="darwin" || process.arch!==process.env.EXPECTED_ARCH || (process.env.RELEASE_TAG && process.env.RELEASE_TAG!==`v${m.version}`)) throw Error("Runner or release tag mismatch");'
+      - name: Reconstruct, build, smoke and package
+        run: bun scripts/build-release-macos.ts --repository "$GITHUB_REPOSITORY"
+      - name: Verify actual installer preservation and rollback
+        env:
+          RELEASE_ARCH: ${{ matrix.arch }}
+        run: |
+          archive=$(bun -e 'console.log((await Bun.file(`release/release-macos-${process.env.RELEASE_ARCH}.json`).json()).archive)')
+          bash scripts/test-installer-macos.sh "$PWD/release/$archive" "$PWD/release/SHA256SUMS-macos-$RELEASE_ARCH" "$PWD/release/release-macos-$RELEASE_ARCH.json"
+      - name: Verify native localization and updater regressions
+        run: |
+          for source in build/macos-*/source; do
+            (cd "$source" && bun test scripts/update-localized.test.ts scripts/reapply-localization.test.ts packages/utils/test/i18n.test.ts packages/coding-agent/test/cli/localized-update.test.ts)
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omp-korean-macos-${{ matrix.arch }}
+          path: |
+            release/*.tar.gz
+            release/SHA256SUMS-macos-*
+            release/release-macos-*.json
+            release/install.sh
+          if-no-files-found: error
+
+  publish:
+    needs: [windows, macos]
+    if: github.event_name == 'push' || inputs.tag != ''
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: omp-korean-*
+          path: release-assets
+          merge-multiple: true
+      - name: Publish all verified platforms together
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $ErrorActionPreference = 'Stop'
-          $manifest = Get-Content release/release.json -Raw -Encoding UTF8 | ConvertFrom-Json
-          $assets = @("release/$($manifest.archive)", 'release/SHA256SUMS', 'release/release.json', 'release/install.ps1')
-          & gh release create $env:RELEASE_TAG @assets --repo $env:GITHUB_REPOSITORY --verify-tag --title $env:RELEASE_TAG --notes-file RELEASE_NOTES.md
-          if ($LASTEXITCODE -ne 0) { throw 'GitHub release creation failed; no remote repository was created.' }
+          gh release create "$RELEASE_TAG" release-assets/* --repo "$GITHUB_REPOSITORY" --verify-tag --title "$RELEASE_TAG" --notes-file RELEASE_NOTES.md
