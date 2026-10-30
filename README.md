@@ -2,29 +2,33 @@
 
 Windows x64 및 macOS Apple Silicon·Intel용 omp 언어팩 배포판입니다. **기본 실행은 영어**이며, `OMP_LANG=ko`로 한국어를 선택할 수 있습니다. 한국어 번역은 편집 가능한 외부 팩으로 제공합니다. 공식 omp가 언어팩을 읽는 것은 아니므로 **언어팩 지원 실행 파일을 함께 설치**합니다.
 
-- 최신 배포: **[18.13.3-ko.3](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.13.3-ko.3)**
-- 기반 omp: **18.13.3**
+- 최신 배포: **[18.14.0-ko.1](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.14.0-ko.1)**
+- 기반 omp: **18.14.0**
 - 지원 대상: **Windows x64 / Windows PowerShell 5.1 이상**, **macOS arm64·x64**. macOS 실제 빌드·설치 성공 여부는 해당 릴리스의 Actions 결과를 확인하세요.
 - 일반 사용자 실행: Bun·Node.js·Git 설치 불필요
 - 원본 프로젝트: <https://github.com/can1357/oh-my-pi>
 
 공식 프로젝트의 한국어 지원 릴리스가 아닌 별도 포크입니다. 모델 답변, 외부 도구 출력과 서비스 오류 원문까지 자동 번역하지는 않습니다.
 
+최신 배포는 **18.14.0-ko.1**입니다. 아래 설치 명령은 GitHub Releases의 최신 공개 버전을 받습니다.
+
 ## 이번 버전의 주요 변경
 
-**macOS Apple Silicon·Intel용 설치와 배포를 추가했습니다.** Windows 설치 방법과 실행 중 `/language ko`·`/language en` 언어 전환은 유지합니다.
+**OMP 18.14.0 기반으로 갱신했습니다.** 일부 번역이 새 구조와 맞지 않아도 최신 원본 기능과 나머지 안전한 번역을 계속 적용합니다.
 
-- macOS는 CPU에 맞는 파일을 자동 선택하고, 기존 외부 언어팩과 사용자 데이터를 보존합니다.
-- Windows·macOS arm64·macOS x64의 빌드·실행·설치 검사가 모두 성공한 파일을 함께 게시합니다.
-- macOS 빌드는 임시 서명을 사용하며 개발자 인증서 서명·공증은 제공하지 않습니다.
+- 한국어 언어팩 **9,825개**: 이전 공개본보다 33개 항목을 추가했습니다.
+- 명령 설명·브라우저 라벨의 언어 초기화 순서를 보완하고 업데이트 진행·결과 등의 번역을 보강했습니다.
+- HTML 내보내기·통계·협업 화면은 각각 독립적으로 적용합니다. **18.14.0에서 바뀐 HTML 내보내기는 원본 화면을 유지해 일부 UI가 영어로 표시될 수 있습니다.**
+- 잘못된 경로·기준과 실행 안전 오류는 교체 전에 중단하며, 기존 사용자 언어팩·인증·설정·세션 보존 정책은 유지합니다.
+- Windows·macOS Apple Silicon·Intel을 지원합니다.
 
-[전체 변경 사항과 검증 결과](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.13.3-ko.3) · [최신 배포 파일](https://github.com/seojihun618-dotcom/omp-korean/releases/latest)
+[전체 변경 사항·검증 범위](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.14.0-ko.1) · [최신 배포 파일](https://github.com/seojihun618-dotcom/omp-korean/releases/latest)
 
 ## 사용자가 설치하는 방법
 
 ### Windows: 터미널로 설치
 
-아래 명령은 최신 공개 릴리즈를 설치합니다. 현재 최신 배포는 **18.13.3-ko.3**입니다.
+아래 명령으로 최신 공개 배포 **18.14.0-ko.1**을 설치합니다.
 
 ```powershell
 irm "https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/install.ps1" | iex
@@ -57,7 +61,7 @@ omp --help
 
 ### Windows: ZIP으로 직접 사용
 
-Releases에서 `omp-korean-18.13.3-ko.3-windows-x64.zip`을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
+Releases에서 `omp-korean-18.14.0-ko.1-windows-x64.zip`을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
 
 ```powershell
 .\omp.exe
@@ -67,7 +71,7 @@ Releases에서 `omp-korean-18.13.3-ko.3-windows-x64.zip`을 내려받아 압축�
 
 ### macOS: 터미널로 설치
 
-**18.13.3-ko.3부터 macOS를 지원합니다.** Apple Silicon은 `arm64`, Intel 맥은 `x64` 파일을 자동 선택합니다.
+macOS용 설치기는 Apple Silicon은 `arm64`, Intel 맥은 `x64` 파일을 자동 선택합니다.
 
 ```sh
 curl -fL https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/install.sh -o install-omp-korean.sh
@@ -82,7 +86,7 @@ OMP_LANG=ko omp
 
 다른 위치에는 `OMP_INSTALL_DIR`와 `OMP_BIN_DIR`를 절대 경로로 지정할 수 있습니다. 기존 한국어·영어 외부 팩은 재설치 시 그대로 보존합니다. 체크섬·아카이브 경로·파일 종류·실제 실행 검증을 통과한 파일만 설치합니다.
 
-직접 실행하려면 Releases의 `omp-korean-18.13.3-ko.3-macos-arm64.tar.gz` 또는 `omp-korean-18.13.3-ko.3-macos-x64.tar.gz`를 별도 폴더에 풀고 `OMP_LANG=ko ./omp`를 실행하세요. `omp`, `locales/`, `update/`를 함께 유지하세요. macOS 빌드는 개발자 인증서·공증이 아닌 임시 서명을 사용합니다. Gatekeeper 경고 시 보안 기능을 해제하지 말고 배포 출처·체크섬을 확인하세요.
+직접 실행하려면 Releases의 `omp-korean-18.14.0-ko.1-macos-arm64.tar.gz` 또는 `omp-korean-18.14.0-ko.1-macos-x64.tar.gz`를 별도 폴더에 풀고 `OMP_LANG=ko ./omp`를 실행하세요. `omp`, `locales/`, `update/`를 함께 유지하세요. macOS 빌드는 개발자 인증서·공증이 아닌 임시 서명을 사용합니다. Gatekeeper 경고 시 보안 기능을 해제하지 말고 배포 출처·체크섬을 확인하세요.
 
 ## 언어팩은 어떻게 적용되나요?
 
@@ -101,9 +105,10 @@ OMP_LANG=ko omp
 - 선택한 한국어팩에 없는 항목은 영어 원문으로 표시합니다. 선택한 파일이 없거나 잘못되었으면 경고 후 영어로 실행합니다. 실행 파일에 숨겨진 내장 한국어팩은 없습니다.
 - `en.json`은 영어 원문 참고 목록입니다. 영어 모드는 코드의 영어 원문을 사용합니다.
 - 키와 `{0}`, `{1}` 같은 자리표시자, JSON 문법을 유지하세요. `\u0004` 뒤의 문맥은 같은 단어의 서로 다른 뜻을 구분합니다.
-- ko.4에서는 파일·함수에 종속된 일부 문맥 키를 의미 기반으로 교체했습니다. 이전 `ko.json`은 자동으로 덮어쓰지 않으므로, `update/locales/ko.json`의 새 키를 본인 수정본에 비교·병합하세요. 이전 키를 조회하는 호환 별칭은 없습니다.
+- 18.13.2-ko.4부터 파일·함수에 종속된 일부 문맥 키를 의미 기반으로 교체했습니다. 이전 `ko.json`은 자동으로 덮어쓰지 않으므로, `update/locales/ko.json`의 새 키를 본인 수정본에 비교·병합하세요. 이전 키를 조회하는 호환 별칭은 없습니다.
 - `OMP_LOCALE_DIR`가 이미 설정돼 있으면 그 디렉터리의 언어팩을 우선합니다.
 - 외부 팩을 읽거나 검증할 수 없으면 팩 내용을 출력하지 않고 경고한 뒤 영어로 실행합니다. SDK·worker의 공통 import만으로는 언어팩을 읽지 않습니다.
+- 안전하게 일치하는 CLI 명령 설명과 브라우저의 테마·탐색·도구 라벨은 언어 초기화 뒤에 번역합니다. 독립 `omp-stats` 도움말에도 선택한 언어를 적용합니다. 18.14.0에서 구조가 바뀐 HTML 내보내기는 최신 원본을 유지하며, 이전 버전의 제목·컨트롤·접근성 이름 한글화는 재적용하지 않습니다. 대화·모델 응답·원시 도구 결과는 번역하지 않습니다.
 
 실행 중에는 입력창에 다음 명령을 입력할 수 있습니다.
 
@@ -132,7 +137,11 @@ macOS에서 현재 터미널의 언어를 선택하려면 `OMP_LANG=ko omp` 또�
 
 이전 개발용 설치의 `omp-localized.json`이 있는 경로에는 배포 설치기가 덮어쓰지 않습니다. 그런 경우 Windows는 다른 `-InstallDir`, macOS는 다른 `OMP_INSTALL_DIR`를 사용하세요. 사용자 데이터 폴더를 삭제하거나 공식 설치 파일을 바꿔 해결하지 마세요.
 
-번역은 이전에 검토된 문구와 사용 문맥이 안전하게 일치하는 곳에만 재적용합니다. 새 항목, 바뀐 문구·문맥, 모호한 위치는 영어로 둡니다. 번역 키가 외부 `ko.json`에 없을 때도 영어 원문을 표시합니다. 기존 번역이 모두 유지된다는 보장은 없으며, 화면이나 코드 구조가 바뀌면 해당 부분은 영어로 남을 수 있습니다.
+번역은 이전에 검토된 문구와 사용 문맥이 안전하게 일치하는 곳에만 재적용합니다. **새 항목, 바뀐 문구·문맥, 모호한 위치는 최신 영어 원문으로 두고, 번역 불일치만으로 업데이트를 막지 않습니다.** 번역 키가 외부 `ko.json`에 없을 때도 영어 원문을 표시합니다.
+
+HTML 내보내기·통계·협업 화면은 서로 독립된 한글화 묶음입니다. 어느 묶음의 구조가 호환되지 않으면 그 묶음의 호스트 초기화·지연 라벨·일반 번역 호출·자산을 함께 제외하고 최신 원본을 유지합니다. 일부 라벨만 번역하거나 이전 코드를 이식하지 않으며, 다른 묶음의 안전한 번역과 업데이트는 계속합니다. 명령 도움말 같은 별도 파일의 구조 변경은 해당 파일만 제외합니다. 업데이트가 표시하는 제외 수는 이전에 검토한 번역 위치 수이지 현재 화면의 미번역 문자열 수가 아닙니다.
+
+번역 불일치와 실행 안전 오류는 구분합니다. 잘못된 재적용 기준·경로, CLI의 worker 분기·언어 초기화 경계, 업데이트의 관리 설치 보호, 기존 원본 런타임과의 충돌처럼 안전에 필수인 조건을 충족하지 못하면 교체 전에 중단합니다. 18.14.0의 호스팅 HTML 뷰어는 원본 매니페스트의 URL·무결성 해시를 유지하며, 한글화한 자산을 다시 생성해 공개 서버에 없는 파일을 참조하지 않습니다.
 
 업데이트에는 인터넷 연결과 소스·의존성·빌드를 위한 추가 디스크 공간이 필요합니다. 포터블 배포에는 Bun을 포함하므로 Bun·Node.js·Git을 별도로 설치할 필요가 없습니다. 실행 파일 옆의 **`update` 폴더를 유지**하세요. 새 실행 파일의 버전, 한국어·영어 실행, 외부 언어팩 적용을 확인한 뒤 교체합니다. 다운로드·빌드·검증 실패 시 기존 한글판을 유지하며 공식 영어판을 대신 설치하지 않습니다. 이전 실행 파일 백업과 작업 소스는 설치 폴더에 남습니다.
 
@@ -169,7 +178,7 @@ build/                       재빌드 작업 폴더, Git 추적 제외
 
 1. 빈 GitHub 저장소를 만들고 이 폴더의 저장소 파일을 올립니다. `.github`와 `.gitignore`도 포함하세요.
 2. GitHub Actions 사용을 허용합니다. Windows x64, macOS arm64, macOS x64의 기본 러너에서 각각 빌드·실행·설치를 검증합니다.
-3. `release.json`과 같은 버전의 태그 **`v18.13.3-ko.3`**을 push합니다.
+3. `release.json`과 같은 버전의 태그 **`v18.14.0-ko.1`**을 push합니다.
 4. 세 빌드가 모두 통과해야 하나의 Release에 Windows ZIP·설치기·매니페스트·체크섬, macOS 두 아키텍처의 tar.gz·매니페스트·체크섬과 `install.sh`를 함께 게시합니다. 하나라도 실패하면 게시하지 않습니다.
 5. 게시된 Releases의 설치 스크립트 URL을 사용자에게 안내합니다.
 
@@ -181,8 +190,8 @@ git commit -m "Publish Korean language-pack distribution"
 git branch -M main
 git remote add origin https://github.com/seojihun618-dotcom/omp-korean.git
 git push -u origin main
-git tag v18.13.3-ko.3
-git push origin v18.13.3-ko.3
+git tag v18.14.0-ko.1
+git push origin v18.14.0-ko.1
 ```
 
 자동 게시에는 워크플로의 `contents: write` 권한이 필요합니다. 저장소·조직 정책이 이를 차단하면 권한 정책을 확인하세요. 개인 토큰이나 모델 API 키를 저장소에 넣을 필요는 없습니다.

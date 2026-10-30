@@ -84,7 +84,12 @@ jobs:
       - name: Generate browser assets used by application imports
         id: assets
         working-directory: verification/source
-        run: bun run gen:stats && bun --cwd=packages/collab-web run gen:tool-views
+        # Build the original viewer: localized bundles have unpublished content hashes.
+        run: |
+          bun run gen:stats
+          git worktree add --detach ../upstream-viewer HEAD
+          (cd ../upstream-viewer && bun install --frozen-lockfile --ignore-scripts && bun run gen:export-viewer --check)
+          cp -R ../upstream-viewer/packages/coding-agent/export-assets packages/coding-agent/
       - name: Check formatting, types and Rust
         working-directory: verification/source
         run: bun check
