@@ -71,7 +71,7 @@ Releases에서 `omp-korean-18.14.0-ko.1-windows-x64.zip`을 내려받아 압축�
 
 ### macOS: 터미널로 설치
 
-macOS용 설치기는 Apple Silicon은 `arm64`, Intel 맥은 `x64` 파일을 자동 선택합니다.
+Apple Silicon은 `arm64`, Intel 맥은 `x64` 파일을 자동 선택합니다.
 
 ```sh
 curl -fL https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/install.sh -o install-omp-korean.sh

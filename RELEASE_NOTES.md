@@ -65,6 +65,8 @@ Windows ZIP, macOS arm64·x64 tar.gz도 아래 첨부 파일에서 받을 수 �
 
 ## 검증 범위와 제한
 
+- **공개 배포 검사 완료:** [Windows·macOS arm64·macOS x64 릴리스 작업](https://github.com/seojihun618-dotcom/omp-korean/actions/runs/40991294721)이 모두 성공했습니다. 실제 플랫폼별 빌드·양 언어 실행·외부 팩·설치 보존·롤백 검사와 macOS 업데이트 회귀 검사를 통과한 뒤 함께 게시했습니다.
+
 - 제작 기록: 스크립트 181개 통과·기존 제외 9개·실패 0개, 언어·업데이트·HTML·모델 경계 대상 검사 64개 통과.
 - 제작 기록: 격리된 이전 배포본에서 실제 `omp update`로 18.14.0 전환, 외부 팩 바이트 보존, 새 ZIP의 `update --check`·`update --force`, 영어·한국어 도움말·smoke·외부 팩 검사 확인.
 - 게시 준비 중 Windows 로컬 ZIP의 실제 오프라인 설치·재설치·부분 팩 보존·체크섬/경로 이탈 거부·잠긴 파일 롤백·개발용 설치 보호·PATH 불변 검사를 다시 통과했습니다.
@@ -76,3 +78,5 @@ Windows ZIP, macOS arm64·x64 tar.gz도 아래 첨부 파일에서 받을 수 �
 [공식 원본 변경 비교](https://github.com/can1357/oh-my-pi/compare/413d278a87a69b453efabf8d1fedb9940385e8c6...31147f9d1a76608549821c3759f8487b4d66c72d)
 
 플랫폼별 아카이브·매니페스트·SHA-256과 `install.ps1`·`install.sh`를 함께 제공합니다. 기존 릴리즈는 유지합니다.
+
+이번 배포의 소스 패치·언어팩·배포 도구는 `omp-korean-18.14.0-ko.1-github-source.zip`에도 포함했습니다.
