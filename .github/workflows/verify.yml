@@ -84,9 +84,10 @@ jobs:
       - name: Generate browser assets used by application imports
         id: assets
         working-directory: verification/source
-        # Build the original viewer: localized bundles have unpublished content hashes.
+        # Keep upstream hosted assets verifiable and build the fork's self-contained localized viewer.
         run: |
           bun run gen:stats
+          bun --cwd=packages/collab-web run gen:export-viewer --embedded
           git worktree add --detach ../upstream-viewer HEAD
           (cd ../upstream-viewer && bun install --frozen-lockfile --ignore-scripts && bun run gen:export-viewer --check)
           cp -R ../upstream-viewer/packages/coding-agent/export-assets packages/coding-agent/
