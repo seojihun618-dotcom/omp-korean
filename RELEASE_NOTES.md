@@ -63,6 +63,8 @@ Windows ZIP과 macOS arm64·x64 tar.gz도 아래 첨부 파일에서 받을 수 
 
 ## 검증 범위와 제한
 
+- **공개 배포 검사 완료:** [Windows·macOS arm64·macOS x64 릴리스 작업](https://github.com/seojihun618-dotcom/omp-korean/actions/runs/41182773022)이 모두 성공했습니다. 실제 플랫폼별 빌드·양 언어 실행·외부 팩·설치 보존·롤백 검사와 macOS 업데이트 회귀 검사를 통과한 뒤 함께 게시했습니다.
+
 - 제작 기록: `bun run check:ts`의 워크스페이스 타입·린트·포맷 검사 통과. 기존 린트 경고는 남아 있습니다.
 - 제작 기록: 스크립트 182개, 영향받은 TUI 동작 121개, 언어팩·모델 경계·업데이트·HTML·뷰어·통계 검사 75개 통과. 마지막 타입 검사 뒤 관련 묶음 257개 통과·기존 제외 9개·실패 0개를 확인했습니다.
 - 제작 기록: 실제 Chromium에서 한영 HTML 내보내기·밝은 테마·추적·하위 세션 탐색·원문 보존, 격리 통계 서버와 협업·TUI 화면을 확인했습니다. 로그인이나 실제 모델 요청 검증을 뜻하지는 않습니다.
@@ -75,3 +77,5 @@ Windows ZIP과 macOS arm64·x64 tar.gz도 아래 첨부 파일에서 받을 수 
 [공식 원본 변경 비교](https://github.com/can1357/oh-my-pi/compare/31147f9d1a76608549821c3759f8487b4d66c72d...c29f7c56f5530d805bb2887ade964aa55970d8e1)
 
 플랫폼별 아카이브·매니페스트·SHA-256과 `install.ps1`·`install.sh`를 함께 제공합니다. 기존 릴리즈는 유지합니다.
+
+이번 배포의 소스 패치·언어팩·배포 도구는 `omp-korean-18.14.1-ko.1-github-source.zip`에도 포함했습니다.
