@@ -65,6 +65,8 @@ Windows ZIP과 macOS arm64·x64 tar.gz도 아래 첨부 파일에서 받을 수 
 
 ## 검증 범위와 제한
 
+- **세 플랫폼 실제 검사 통과:** [Windows](https://github.com/seojihun618-dotcom/omp-korean/actions/runs/42611846373/job/129141959691), [Intel macOS](https://github.com/seojihun618-dotcom/omp-korean/actions/runs/42611846373/job/129141959017), [Apple Silicon macOS](https://github.com/seojihun618-dotcom/omp-korean/actions/runs/42613179176/job/129146486352)의 빌드·실행·설치 보존·롤백 검사를 통과했습니다. macOS의 언어팩·업데이트 회귀 검사도 통과했습니다. 실행 환경 배정 지연으로 같은 배포 태그의 검증 산출물을 두 실행에서 모아 게시했으며, Apple Silicon은 지원되는 macOS 26 환경에서 빌드했습니다.
+
 - 제작 기록: 최종 `bun run check:ts` 통과. 스크립트 191개 통과·기존 플랫폼 제외 12개·실패 0개, 언어팩·HTML 폼·Ask·시간 제한·컨트롤러·모델 경계·HTML 내보내기 대상 검사 98개 통과.
 - 제작 기록: 최종 ZIP 실행 파일의 언어 선택·한영 smoke·잘못된 외부 팩의 영어 전환·읽기 전용 업데이트 조회 등 14개 시나리오 통과. 원본에 기준을 두 번 적용했을 때 두 번째 변경 파일은 0개입니다.
 - 제작 기록: 실제 TUI 폼 제출과 Chromium의 한영 HTML 폼 결과에서 질문·답변·사용자 원문 보존을 확인했습니다. 배포 실행 파일의 Windows zsh에서 msys 출력·리디렉션도 확인했지만 모든 셸 작업 제어를 검사한 것은 아닙니다.
@@ -77,3 +79,5 @@ Windows ZIP과 macOS arm64·x64 tar.gz도 아래 첨부 파일에서 받을 수 
 [공식 원본 전체 변경 비교](https://github.com/can1357/oh-my-pi/compare/c29f7c56f5530d805bb2887ade964aa55970d8e1...21f1188cf88b2f534c092181968cd5a4d1a9c296)
 
 플랫폼별 아카이브·매니페스트·SHA-256과 `install.ps1`·`install.sh`를 함께 제공합니다. 기존 릴리즈는 유지합니다.
+
+이번 배포의 소스 패치·언어팩·배포 도구는 `omp-korean-18.18.3-ko.1-github-source.zip`에도 포함했습니다.
