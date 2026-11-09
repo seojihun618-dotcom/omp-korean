@@ -1,8 +1,8 @@
 {
-  "version": "18.14.1-ko.1",
-  "upstreamVersion": "18.14.1",
-  "upstreamCommit": "c29f7c56f5530d805bb2887ade964aa55970d8e1",
+  "version": "18.18.3-ko.1",
+  "upstreamVersion": "18.18.3",
+  "upstreamCommit": "21f1188cf88b2f534c092181968cd5a4d1a9c296",
   "bunVersion": "1.4.4",
   "platform": "windows-x64",
-  "archive": "omp-korean-18.14.1-ko.1-windows-x64.zip"
+  "archive": "omp-korean-18.18.3-ko.1-windows-x64.zip"
 }

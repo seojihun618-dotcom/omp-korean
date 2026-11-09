@@ -276,7 +276,8 @@ namespace OmpKoreanInstaller {
         'update/scripts/localized-update.ts',
         'update/locales/ko.json', 'update/locales/en.json'
     )
-    foreach ($name in $allowed) {
+    $managed = $allowed + @('omp-portable-update.json')
+    foreach ($name in $managed) {
         $path = Join-Path $target $name
         Assert-PlainPath $path
         if ((Test-Path -LiteralPath $path) -and -not (Test-Path -LiteralPath $path -PathType Leaf)) {
@@ -348,6 +349,17 @@ namespace OmpKoreanInstaller {
         $preservePack = Test-Path -LiteralPath $customPack -PathType Leaf
         if ($preservePack) { [IO.File]::Copy($customPack, (Join-Path $stage 'locales/ko.json'), $true) }
         Assert-Candidate $stage $manifest $work
+        # A reinstall must not retain metadata from an older source-built update.
+        $portableMetadata = @{
+            schemaVersion = 1
+            repoRoot = Join-Path $target 'update'
+            bunPath = Join-Path $target 'update/bun.exe'
+            executablePath = Join-Path $target 'omp.exe'
+            localeDir = Join-Path $target 'locales'
+            version = $manifest.upstreamVersion
+        }
+        [IO.File]::WriteAllText((Join-Path $stage 'omp-portable-update.json'),
+            ($portableMetadata | ConvertTo-Json) + "`n", (New-Object Text.UTF8Encoding($false)))
 
         $backup = Join-Path $work 'backup'
         [IO.Directory]::CreateDirectory($backup) | Out-Null
@@ -364,7 +376,7 @@ namespace OmpKoreanInstaller {
         try {
             Assert-PlainPath $target
             if (Test-Path -LiteralPath (Join-Path $target 'omp-localized.json')) { throw 'Developer metadata appeared during installation; refusing promotion.' }
-            foreach ($name in $allowed) {
+            foreach ($name in $managed) {
                 # A customization is never moved, normalized, or rewritten during a reinstall.
                 if ($preservePack -and $name -ceq 'locales/ko.json') { continue }
                 $destination = Join-Path $target $name
