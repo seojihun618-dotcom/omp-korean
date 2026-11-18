@@ -112329,3 +112329,54 @@ index 0000000..4428ef0
 +		process.exitCode = 1;
 +	}
 +}
+diff --git a/packages/coding-agent/test/default-model-ambient-bedrock.test.ts b/packages/coding-agent/test/default-model-ambient-bedrock.test.ts
+index 5315489..38143c3 100644
+--- a/packages/coding-agent/test/default-model-ambient-bedrock.test.ts
++++ b/packages/coding-agent/test/default-model-ambient-bedrock.test.ts
+@@ -25,19 +25,20 @@ describe("issue #9967 default model with ambient Bedrock credentials", () => {
+ 	let tempDir: string;
+ 	let authStorage: AuthStorage;
+ 	let registry: ModelRegistry;
+-	let savedAccessKey: string | undefined;
+-	let savedSecret: string | undefined;
+-	let savedBearerToken: string | undefined;
++	let savedAwsEnv: Map<string, string>;
+ 
+ 	beforeEach(async () => {
+-		savedAccessKey = process.env.AWS_ACCESS_KEY_ID;
+-		savedSecret = process.env.AWS_SECRET_ACCESS_KEY;
+-		savedBearerToken = process.env.AWS_BEARER_TOKEN_BEDROCK;
+-		delete process.env.AWS_ACCESS_KEY_ID;
+-		delete process.env.AWS_SECRET_ACCESS_KEY;
+-		delete process.env.AWS_BEARER_TOKEN_BEDROCK;
++		savedAwsEnv = new Map();
++		for (const [key, value] of Object.entries(process.env)) {
++			if (!key.startsWith("AWS_")) continue;
++			if (value !== undefined) savedAwsEnv.set(key, value);
++			delete process.env[key];
++		}
+ 		tempDir = path.join(os.tmpdir(), `pi-9967-${Snowflake.next()}`);
+ 		fs.mkdirSync(tempDir, { recursive: true });
++		process.env.AWS_EC2_METADATA_DISABLED = "true";
++		process.env.AWS_SHARED_CREDENTIALS_FILE = path.join(tempDir, "credentials");
++		process.env.AWS_CONFIG_FILE = path.join(tempDir, "config");
+ 		authStorage = createInMemoryAuthStorage();
+ 		// The user's only real login: an Anthropic credential.
+ 		await authStorage.credentials.set("anthropic", [{ type: "api_key", key: "sk-test-anthropic" }]);
+@@ -46,12 +47,10 @@ describe("issue #9967 default model with ambient Bedrock credentials", () => {
+ 
+ 	afterEach(() => {
+ 		authStorage.close();
+-		if (savedAccessKey === undefined) delete process.env.AWS_ACCESS_KEY_ID;
+-		else process.env.AWS_ACCESS_KEY_ID = savedAccessKey;
+-		if (savedSecret === undefined) delete process.env.AWS_SECRET_ACCESS_KEY;
+-		else process.env.AWS_SECRET_ACCESS_KEY = savedSecret;
+-		if (savedBearerToken === undefined) delete process.env.AWS_BEARER_TOKEN_BEDROCK;
+-		else process.env.AWS_BEARER_TOKEN_BEDROCK = savedBearerToken;
++		for (const key of Object.keys(process.env)) {
++			if (key.startsWith("AWS_")) delete process.env[key];
++		}
++		for (const [key, value] of savedAwsEnv) process.env[key] = value;
+ 		fs.rmSync(tempDir, { recursive: true, force: true });
+ 	});
+ 	function getRelevantModels() {
