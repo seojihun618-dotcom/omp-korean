@@ -74,7 +74,7 @@ jobs:
           PY
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2026-10-06
+          toolchain: nightly-2026-11-08
           components: rustfmt, clippy
       - uses: taiki-e/install-action@cargo-nextest
       - uses: Swatinem/rust-cache@v2
@@ -93,7 +93,7 @@ jobs:
           cp -R ../upstream-viewer/packages/coding-agent/export-assets packages/coding-agent/
       - name: Check formatting, types and Rust
         working-directory: verification/source
-        run: bun check
+        run: bun run check
       - name: Run all repository script tests
         if: ${{ !cancelled() && steps.assets.outcome == 'success' }}
         working-directory: verification/source
@@ -103,7 +103,7 @@ jobs:
         working-directory: verification/source
         # Keep the repository's 600s test watchdog; cold compilation is not a hung test.
         # Workspace exclusions match scripts/run-rs-task.ts.
-        run: cargo nextest run --workspace --exclude brush-core --exclude brush-parser --exclude cfg_aliases --exclude napi --no-run
+        run: cargo nextest run --workspace --exclude cfg_aliases --exclude jaq-core --exclude jaq-json --exclude jaq-std --exclude napi --no-run
       - name: Run the complete TypeScript suite
         if: ${{ !cancelled() && steps.assets.outcome == 'success' }}
         working-directory: verification/source

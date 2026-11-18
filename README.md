@@ -2,39 +2,27 @@
 
 Windows x64 및 macOS Apple Silicon·Intel용 omp 언어팩 배포판입니다. **기본 실행은 영어**이며, `OMP_LANG=ko`로 한국어를 선택할 수 있습니다. 한국어 번역은 편집 가능한 외부 팩으로 제공합니다. 공식 omp가 언어팩을 읽는 것은 아니므로 **언어팩 지원 실행 파일을 함께 설치**합니다.
 
-- 최신 배포: **[18.18.3-ko.1](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.18.3-ko.1)**
-- 기반 omp: **18.18.3**
+- 배포 버전: **18.22.2-ko.1**
+- 기반 omp: **18.22.2**
 - 지원 대상: **Windows x64 / Windows PowerShell 5.1 이상**, **macOS arm64·x64**. macOS 실제 빌드·설치 성공 여부는 해당 릴리스의 Actions 결과를 확인하세요.
 - 일반 사용자 실행: Bun·Node.js·Git 설치 불필요
 - 원본 프로젝트: <https://github.com/can1357/oh-my-pi>
 
 공식 프로젝트의 한국어 지원 릴리스가 아닌 별도 포크입니다. 모델 답변, 외부 도구 출력과 서비스 오류 원문까지 자동 번역하지는 않습니다.
 
-최신 배포는 **18.18.3-ko.1**입니다. 아래 설치 명령은 GitHub Releases의 최신 공개 버전을 받습니다.
-
-## 이번 버전의 주요 변경
-
-**OMP 18.18.3 기반·이전 공개본 대비 번역 414개 추가·업데이트 잠금 복구**를 담았습니다.
-
-- 언어팩 **10,532개**: 최신 HTML 폼 질문 제어와 위임 안내, 시작 팁·설정·CLI·통계 화면의 번역을 보강했습니다.
-- 최신 원본의 HTML 폼 기반 `ask`, Eval `sh`, 위임 정책과 Windows 셸 동작을 유지합니다. 모델이 작성한 폼 문구와 제출 값은 번역하지 않습니다.
-- 종료된 업데이트의 PID 잠금을 복구하고, Windows 재설치 시 실행 파일과 업데이트 메타데이터를 함께 갱신·복원합니다.
-- Spotlight 통계·상대시간·HTML 내보내기와 외부 팩 치환 처리를 보완했습니다. 기존 사용자 언어팩·인증·설정·세션 보존 정책을 유지합니다.
-- Windows·macOS Apple Silicon·Intel을 지원합니다.
-
-[전체 변경 사항·검증 범위](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.18.3-ko.1) · [최신 배포 파일](https://github.com/seojihun618-dotcom/omp-korean/releases/latest)
+아래 파일명·태그는 현재 배포 대상 버전의 예입니다. 새 배포본의 빌드·설치 검증 및 게시 상태는 [릴리스 노트](RELEASE_NOTES.md)를 확인하세요. `releases/latest`는 실제 게시된 최신 릴리스를 가리키며, 로컬 배포 준비만으로 갱신되지 않습니다.
 
 ## 사용자가 설치하는 방법
 
 ### Windows: 터미널로 설치
 
-아래 명령으로 최신 공개 배포 **18.18.3-ko.1**을 설치합니다.
+공개 배포 저장소의 최신 설치 스크립트:
 
 ```powershell
 irm "https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/install.ps1" | iex
 ```
 
-**Releases에 첨부된 install.ps1**에는 해당 저장소 주소가 들어 있으므로 추가 인수가 필요 없습니다. 원격 스크립트는 실행 전에 내용을 확인하고 신뢰할 수 있는 저장소의 주소만 사용하세요. 체크섬은 다운로드 손상을 검증하며 배포자의 신원을 보증하는 전자서명은 아닙니다.
+GitHub Actions가 생성한 **Releases의 install.ps1**에는 해당 저장소 주소가 들어 있으므로 추가 인수가 필요 없습니다. 원격 스크립트는 실행 전에 내용을 확인하고 신뢰할 수 있는 저장소의 주소만 사용하세요. 체크섬은 다운로드 손상을 검증하며 배포자의 신원을 보증하는 전자서명은 아닙니다.
 
 설치기는 다음 작업만 수행합니다.
 
@@ -61,7 +49,7 @@ omp --help
 
 ### Windows: ZIP으로 직접 사용
 
-Releases에서 `omp-korean-18.18.3-ko.1-windows-x64.zip`을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
+해당 버전이 게시된 뒤 Releases에서 `omp-korean-18.22.2-ko.1-windows-x64.zip`을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
 
 ```powershell
 .\omp.exe
@@ -71,7 +59,7 @@ Releases에서 `omp-korean-18.18.3-ko.1-windows-x64.zip`을 내려받아 압축�
 
 ### macOS: 터미널로 설치
 
-Apple Silicon은 `arm64`, Intel 맥은 `x64` 파일을 자동 선택합니다.
+**해당 버전의 macOS 파일이 포함된 릴리스가 게시된 후** 사용할 수 있습니다. Apple Silicon은 `arm64`, Intel 맥은 `x64` 파일을 자동 선택합니다.
 
 ```sh
 curl -fL https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/install.sh -o install-omp-korean.sh
@@ -86,7 +74,7 @@ OMP_LANG=ko omp
 
 다른 위치에는 `OMP_INSTALL_DIR`와 `OMP_BIN_DIR`를 절대 경로로 지정할 수 있습니다. 기존 한국어·영어 외부 팩은 재설치 시 그대로 보존합니다. 체크섬·아카이브 경로·파일 종류·실제 실행 검증을 통과한 파일만 설치합니다.
 
-직접 실행하려면 Releases의 `omp-korean-18.18.3-ko.1-macos-arm64.tar.gz` 또는 `omp-korean-18.18.3-ko.1-macos-x64.tar.gz`를 별도 폴더에 풀고 `OMP_LANG=ko ./omp`를 실행하세요. `omp`, `locales/`, `update/`를 함께 유지하세요. macOS 빌드는 개발자 인증서·공증이 아닌 임시 서명을 사용합니다. Gatekeeper 경고 시 보안 기능을 해제하지 말고 배포 출처·체크섬을 확인하세요.
+직접 실행하려면 해당 릴리스의 macOS 빌드가 성공한 뒤 Releases의 `omp-korean-18.22.2-ko.1-macos-arm64.tar.gz` 또는 `omp-korean-18.22.2-ko.1-macos-x64.tar.gz`를 별도 폴더에 풀고 `OMP_LANG=ko ./omp`를 실행하세요. `omp`, `locales/`, `update/`를 함께 유지하세요. macOS 빌드는 개발자 인증서·공증이 아닌 임시 서명을 사용합니다. Gatekeeper 경고 시 보안 기능을 해제하지 말고 배포 출처·체크섬을 확인하세요.
 
 ## 언어팩은 어떻게 적용되나요?
 
@@ -180,20 +168,20 @@ build/                       재빌드 작업 폴더, Git 추적 제외
 
 1. 빈 GitHub 저장소를 만들고 이 폴더의 저장소 파일을 올립니다. `.github`와 `.gitignore`도 포함하세요.
 2. GitHub Actions 사용을 허용합니다. Windows x64, macOS arm64, macOS x64의 기본 러너에서 각각 빌드·실행·설치를 검증합니다.
-3. `release.json`과 같은 버전의 태그 **`v18.18.3-ko.1`**을 push합니다.
+3. `release.json`과 같은 버전의 태그 **`v18.22.2-ko.1`**을 push합니다.
 4. 세 빌드가 모두 통과해야 하나의 Release에 Windows ZIP·설치기·매니페스트·체크섬, macOS 두 아키텍처의 tar.gz·매니페스트·체크섬과 `install.sh`를 함께 게시합니다. 하나라도 실패하면 게시하지 않습니다.
 5. 게시된 Releases의 설치 스크립트 URL을 사용자에게 안내합니다.
 
 ```powershell
-# 배포용 저장소에서 실행하는 예시입니다.
+# 실제 GitHub 저장소를 만든 뒤 OWNER/REPO를 바꿔 실행합니다.
 git init
 git add .
 git commit -m "Publish Korean language-pack distribution"
 git branch -M main
-git remote add origin https://github.com/seojihun618-dotcom/omp-korean.git
+git remote add origin https://github.com/OWNER/REPO.git
 git push -u origin main
-git tag v18.18.3-ko.1
-git push origin v18.18.3-ko.1
+git tag v18.22.2-ko.1
+git push origin v18.22.2-ko.1
 ```
 
 자동 게시에는 워크플로의 `contents: write` 권한이 필요합니다. 저장소·조직 정책이 이를 차단하면 권한 정책을 확인하세요. 개인 토큰이나 모델 API 키를 저장소에 넣을 필요는 없습니다.
@@ -205,22 +193,24 @@ git push origin v18.18.3-ko.1
 재빌드에는 Windows x64, Git, Windows의 `tar.exe`와 **Bun 1.4.4**가 필요합니다. 고정된 기반 소스와 해당 버전의 네이티브 애드온을 가져와 빌드합니다.
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Repository seojihun618-dotcom/omp-korean
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Repository OWNER/REPO
 ```
 
 macOS에서는 해당 아키텍처의 맥과 Bun 1.4.4, Git이 필요합니다. Rosetta에서 Intel 패키지를 대신 빌드하지 않습니다.
 
 ```sh
-bun scripts/build-release-macos.ts --repository seojihun618-dotcom/omp-korean
+bun scripts/build-release-macos.ts --repository OWNER/REPO
 ```
 
 macOS 산출물은 `omp-korean-<version>-macos-<arch>.tar.gz`, `release-macos-<arch>.json`, `SHA256SUMS-macos-<arch>`, 저장소 주소가 지정된 `install.sh`입니다. 두 아키텍처는 각 맥에서 빌드하고 한 Release에 함께 첨부합니다. `release.json`·`SHA256SUMS`는 기존 Windows 설치기 호환을 위해 Windows 전용 이름을 유지합니다.
 
-결과물은 `release/`에 생성됩니다. 같은 폴더의 ZIP, `SHA256SUMS`, `release.json`, **저장소 주소가 지정된 `install.ps1`**을 하나의 GitHub Release에 함께 첨부하세요. 소스 원본 `install.ps1`이나 저장소가 지정되지 않은 초기 로컬 산출물은 온라인 설치 시 `-Repository seojihun618-dotcom/omp-korean`를 명시해야 합니다. GitHub Actions 또는 위 명령으로 생성한 주소 지정 스크립트를 게시하는 것이 가장 간단합니다.
+결과물은 `release/`에 생성됩니다. 같은 폴더의 ZIP, `SHA256SUMS`, `release.json`, **저장소 주소가 지정된 `install.ps1`**을 하나의 GitHub Release에 함께 첨부하세요. 소스 원본 `install.ps1`이나 저장소가 지정되지 않은 초기 로컬 산출물은 온라인 설치 시 `-Repository OWNER/REPO`를 명시해야 합니다. GitHub Actions 또는 위 명령으로 생성한 주소 지정 스크립트를 게시하는 것이 가장 간단합니다.
+
+로컬 Windows 배포본의 ZIP·실행·외부 팩·오프라인 설치를 다시 검사하려면 Python 3.11 이상에서 `python scripts/verify-release.py build/release-18.22.2/artifact-verification`을 실행하세요. 실제 설치본과 사용자 PATH는 변경하지 않으며, `update --check`에는 인터넷 연결이 필요합니다.
 
 ```powershell
 # 내려받은 설치 스크립트 원본을 명시적 저장소로 실행하는 예
-powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Repository seojihun618-dotcom/omp-korean
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Repository OWNER/REPO
 ```
 
 `-ExecutionPolicy Bypass`는 그 PowerShell 프로세스에만 적용합니다. 시스템 실행 정책이나 보안 기능을 영구적으로 바꾸지 않습니다.
