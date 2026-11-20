@@ -2,39 +2,33 @@
 
 Windows x64 및 macOS Apple Silicon·Intel용 omp 언어팩 배포판입니다. **기본 실행은 영어**이며, `OMP_LANG=ko`로 한국어를 선택할 수 있습니다. 한국어 번역은 편집 가능한 외부 팩으로 제공합니다. 공식 omp가 언어팩을 읽는 것은 아니므로 **언어팩 지원 실행 파일을 함께 설치**합니다.
 
-- 최신 배포: **[18.18.3-ko.1](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.18.3-ko.1)**
-- 기반 omp: **18.18.3**
+- 최신 배포: **[19.0.1-ko.1](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v19.0.1-ko.1)**
+- 기반 omp: **19.0.1**
 - 지원 대상: **Windows x64 / Windows PowerShell 5.1 이상**, **macOS arm64·x64**. macOS 실제 빌드·설치 성공 여부는 해당 릴리스의 Actions 결과를 확인하세요.
 - 일반 사용자 실행: Bun·Node.js·Git 설치 불필요
 - 원본 프로젝트: <https://github.com/can1357/oh-my-pi>
 
 공식 프로젝트의 한국어 지원 릴리스가 아닌 별도 포크입니다. 모델 답변, 외부 도구 출력과 서비스 오류 원문까지 자동 번역하지는 않습니다.
 
-최신 배포는 **18.18.3-ko.1**입니다. 아래 설치 명령은 GitHub Releases의 최신 공개 버전을 받습니다.
-
 ## 이번 버전의 주요 변경
 
-**OMP 18.18.3 기반·이전 공개본 대비 번역 414개 추가·업데이트 잠금 복구**를 담았습니다.
+- OMP **19.0.1** 기반으로 갱신했습니다.
+- 재시작 방식이 바뀐 원본에서 `omp update`가 멈추던 문제를 수정했습니다.
+- npm 배포에 외부 한국어팩을 다시 포함했습니다. 카탈로그는 **10,789개**로 이전 공개판보다 257개 늘었습니다.
 
-- 언어팩 **10,532개**: 최신 HTML 폼 질문 제어와 위임 안내, 시작 팁·설정·CLI·통계 화면의 번역을 보강했습니다.
-- 최신 원본의 HTML 폼 기반 `ask`, Eval `sh`, 위임 정책과 Windows 셸 동작을 유지합니다. 모델이 작성한 폼 문구와 제출 값은 번역하지 않습니다.
-- 종료된 업데이트의 PID 잠금을 복구하고, Windows 재설치 시 실행 파일과 업데이트 메타데이터를 함께 갱신·복원합니다.
-- Spotlight 통계·상대시간·HTML 내보내기와 외부 팩 치환 처리를 보완했습니다. 기존 사용자 언어팩·인증·설정·세션 보존 정책을 유지합니다.
-- Windows·macOS Apple Silicon·Intel을 지원합니다.
-
-[전체 변경 사항·검증 범위](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v18.18.3-ko.1) · [최신 배포 파일](https://github.com/seojihun618-dotcom/omp-korean/releases/latest)
+[변경 사항과 배포 파일](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v19.0.1-ko.1)
 
 ## 사용자가 설치하는 방법
 
 ### Windows: 터미널로 설치
 
-아래 명령으로 최신 공개 배포 **18.18.3-ko.1**을 설치합니다.
+공개 배포 저장소의 최신 설치 스크립트:
 
 ```powershell
 irm "https://github.com/seojihun618-dotcom/omp-korean/releases/latest/download/install.ps1" | iex
 ```
 
-**Releases에 첨부된 install.ps1**에는 해당 저장소 주소가 들어 있으므로 추가 인수가 필요 없습니다. 원격 스크립트는 실행 전에 내용을 확인하고 신뢰할 수 있는 저장소의 주소만 사용하세요. 체크섬은 다운로드 손상을 검증하며 배포자의 신원을 보증하는 전자서명은 아닙니다.
+GitHub Actions가 생성한 **Releases의 install.ps1**에는 해당 저장소 주소가 들어 있으므로 추가 인수가 필요 없습니다. 원격 스크립트는 실행 전에 내용을 확인하고 신뢰할 수 있는 저장소의 주소만 사용하세요. 체크섬은 다운로드 손상을 검증하며 배포자의 신원을 보증하는 전자서명은 아닙니다.
 
 설치기는 다음 작업만 수행합니다.
 
@@ -61,7 +55,7 @@ omp --help
 
 ### Windows: ZIP으로 직접 사용
 
-Releases에서 `omp-korean-18.18.3-ko.1-windows-x64.zip`을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
+Releases에서 `omp-korean-19.0.1-ko.1-windows-x64.zip`을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
 
 ```powershell
 .\omp.exe
@@ -86,7 +80,7 @@ OMP_LANG=ko omp
 
 다른 위치에는 `OMP_INSTALL_DIR`와 `OMP_BIN_DIR`를 절대 경로로 지정할 수 있습니다. 기존 한국어·영어 외부 팩은 재설치 시 그대로 보존합니다. 체크섬·아카이브 경로·파일 종류·실제 실행 검증을 통과한 파일만 설치합니다.
 
-직접 실행하려면 Releases의 `omp-korean-18.18.3-ko.1-macos-arm64.tar.gz` 또는 `omp-korean-18.18.3-ko.1-macos-x64.tar.gz`를 별도 폴더에 풀고 `OMP_LANG=ko ./omp`를 실행하세요. `omp`, `locales/`, `update/`를 함께 유지하세요. macOS 빌드는 개발자 인증서·공증이 아닌 임시 서명을 사용합니다. Gatekeeper 경고 시 보안 기능을 해제하지 말고 배포 출처·체크섬을 확인하세요.
+직접 실행하려면 Releases의 `omp-korean-19.0.1-ko.1-macos-arm64.tar.gz` 또는 `omp-korean-19.0.1-ko.1-macos-x64.tar.gz`를 별도 폴더에 풀고 `OMP_LANG=ko ./omp`를 실행하세요. `omp`, `locales/`, `update/`를 함께 유지하세요. macOS 빌드는 개발자 인증서·공증이 아닌 임시 서명을 사용합니다. Gatekeeper 경고 시 보안 기능을 해제하지 말고 배포 출처·체크섬을 확인하세요.
 
 ## 언어팩은 어떻게 적용되나요?
 
@@ -108,7 +102,7 @@ OMP_LANG=ko omp
 - 18.13.2-ko.4부터 파일·함수에 종속된 일부 문맥 키를 의미 기반으로 교체했습니다. 이전 `ko.json`은 자동으로 덮어쓰지 않으므로, `update/locales/ko.json`의 새 키를 본인 수정본에 비교·병합하세요. 이전 키를 조회하는 호환 별칭은 없습니다.
 - `OMP_LOCALE_DIR`가 이미 설정돼 있으면 그 디렉터리의 언어팩을 우선합니다.
 - 외부 팩을 읽거나 검증할 수 없으면 팩 내용을 출력하지 않고 경고한 뒤 영어로 실행합니다. SDK·worker의 공통 import만으로는 언어팩을 읽지 않습니다.
-- CLI 명령 설명과 브라우저의 테마·탐색·도구 라벨은 언어 초기화 뒤에 번역합니다. 독립 `omp-stats` 도움말·요약도 선택한 언어를 적용합니다. 18.14.1-ko.1부터 최신 HTML 뷰어를 내보낸 파일에 직접 내장해 제목·컨트롤·접근성 이름·타임라인·추적을 다시 한글화합니다. 대화·모델 응답·원시 도구 결과는 번역하지 않습니다.
+- 호환되는 CLI 명령 설명과 브라우저 라벨은 언어 초기화 뒤에 번역합니다. HTML 내보내기·통계·협업 화면의 구조가 바뀌면 해당 묶음은 최신 영어 원본을 유지합니다. 대화·모델 응답·원시 도구 결과는 번역하지 않습니다.
 
 실행 중에는 입력창에 다음 명령을 입력할 수 있습니다.
 
@@ -141,7 +135,7 @@ macOS에서 현재 터미널의 언어를 선택하려면 `OMP_LANG=ko omp` 또�
 
 HTML 내보내기·통계·협업 화면은 서로 독립된 한글화 묶음입니다. 어느 묶음의 구조가 호환되지 않으면 그 묶음의 호스트 초기화·지연 라벨·일반 번역 호출·자산을 함께 제외하고 최신 원본을 유지합니다. 일부 라벨만 번역하거나 이전 코드를 이식하지 않으며, 다른 묶음의 안전한 번역과 업데이트는 계속합니다. 명령 도움말 같은 별도 파일의 구조 변경은 해당 파일만 제외합니다. 업데이트가 표시하는 제외 수는 이전에 검토한 번역 위치 수이지 현재 화면의 미번역 문자열 수가 아닙니다.
 
-번역 불일치와 실행 안전 오류는 구분합니다. 잘못된 재적용 기준·경로, CLI의 worker 분기·언어 초기화 경계, 업데이트의 관리 설치 보호, 기존 원본 런타임과의 충돌처럼 안전에 필수인 조건을 충족하지 못하면 교체 전에 중단합니다. HTML 내보내기는 최신 소스에서 생성한 뷰어를 직접 내장하며, 공식 호스팅 매니페스트의 URL·무결성 해시는 수정하지 않습니다. Markdown·구문 강조 라이브러리는 기존 무결성 검증 CDN을 사용하므로 완전한 오프라인 뷰어는 아닙니다.
+번역 불일치와 실행 안전 오류는 구분합니다. 잘못된 재적용 기준·경로, CLI의 worker 분기·언어 초기화 경계, 업데이트의 관리 설치 보호, 기존 원본 런타임과의 충돌처럼 안전에 필수인 조건을 충족하지 못하면 교체 전에 중단합니다. 재시작 언어 전달의 선택적 보정은 검토된 구형 구조에만 적용합니다. 구조가 달라지면 최신 재시작 코드를 유지하고 나머지 번역과 업데이트를 계속합니다. 공식 호스팅 뷰어의 URL·무결성 해시는 수정하지 않습니다.
 
 업데이트에는 인터넷 연결과 소스·의존성·빌드를 위한 추가 디스크 공간이 필요합니다. 포터블 배포에는 Bun을 포함하므로 Bun·Node.js·Git을 별도로 설치할 필요가 없습니다. 실행 파일 옆의 **`update` 폴더를 유지**하세요. 새 실행 파일의 버전, 한국어·영어 실행, 외부 언어팩 적용을 확인한 뒤 교체합니다. 다운로드·빌드·검증 실패 시 기존 한글판을 유지하며 공식 영어판을 대신 설치하지 않습니다. 이전 실행 파일 백업과 작업 소스는 설치 폴더에 남습니다.
 
@@ -180,20 +174,20 @@ build/                       재빌드 작업 폴더, Git 추적 제외
 
 1. 빈 GitHub 저장소를 만들고 이 폴더의 저장소 파일을 올립니다. `.github`와 `.gitignore`도 포함하세요.
 2. GitHub Actions 사용을 허용합니다. Windows x64, macOS arm64, macOS x64의 기본 러너에서 각각 빌드·실행·설치를 검증합니다.
-3. `release.json`과 같은 버전의 태그 **`v18.18.3-ko.1`**을 push합니다.
+3. `release.json`과 같은 버전의 태그 **`v19.0.1-ko.1`**을 push합니다.
 4. 세 빌드가 모두 통과해야 하나의 Release에 Windows ZIP·설치기·매니페스트·체크섬, macOS 두 아키텍처의 tar.gz·매니페스트·체크섬과 `install.sh`를 함께 게시합니다. 하나라도 실패하면 게시하지 않습니다.
 5. 게시된 Releases의 설치 스크립트 URL을 사용자에게 안내합니다.
 
 ```powershell
-# 배포용 저장소에서 실행하는 예시입니다.
+# 실제 GitHub 저장소를 만든 뒤 OWNER/REPO를 바꿔 실행합니다.
 git init
 git add .
 git commit -m "Publish Korean language-pack distribution"
 git branch -M main
-git remote add origin https://github.com/seojihun618-dotcom/omp-korean.git
+git remote add origin https://github.com/OWNER/REPO.git
 git push -u origin main
-git tag v18.18.3-ko.1
-git push origin v18.18.3-ko.1
+git tag v19.0.1-ko.1
+git push origin v19.0.1-ko.1
 ```
 
 자동 게시에는 워크플로의 `contents: write` 권한이 필요합니다. 저장소·조직 정책이 이를 차단하면 권한 정책을 확인하세요. 개인 토큰이나 모델 API 키를 저장소에 넣을 필요는 없습니다.
@@ -205,22 +199,24 @@ git push origin v18.18.3-ko.1
 재빌드에는 Windows x64, Git, Windows의 `tar.exe`와 **Bun 1.4.4**가 필요합니다. 고정된 기반 소스와 해당 버전의 네이티브 애드온을 가져와 빌드합니다.
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Repository seojihun618-dotcom/omp-korean
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Repository OWNER/REPO
 ```
 
 macOS에서는 해당 아키텍처의 맥과 Bun 1.4.4, Git이 필요합니다. Rosetta에서 Intel 패키지를 대신 빌드하지 않습니다.
 
 ```sh
-bun scripts/build-release-macos.ts --repository seojihun618-dotcom/omp-korean
+bun scripts/build-release-macos.ts --repository OWNER/REPO
 ```
 
 macOS 산출물은 `omp-korean-<version>-macos-<arch>.tar.gz`, `release-macos-<arch>.json`, `SHA256SUMS-macos-<arch>`, 저장소 주소가 지정된 `install.sh`입니다. 두 아키텍처는 각 맥에서 빌드하고 한 Release에 함께 첨부합니다. `release.json`·`SHA256SUMS`는 기존 Windows 설치기 호환을 위해 Windows 전용 이름을 유지합니다.
 
-결과물은 `release/`에 생성됩니다. 같은 폴더의 ZIP, `SHA256SUMS`, `release.json`, **저장소 주소가 지정된 `install.ps1`**을 하나의 GitHub Release에 함께 첨부하세요. 소스 원본 `install.ps1`이나 저장소가 지정되지 않은 초기 로컬 산출물은 온라인 설치 시 `-Repository seojihun618-dotcom/omp-korean`를 명시해야 합니다. GitHub Actions 또는 위 명령으로 생성한 주소 지정 스크립트를 게시하는 것이 가장 간단합니다.
+결과물은 `release/`에 생성됩니다. 같은 폴더의 ZIP, `SHA256SUMS`, `release.json`, **저장소 주소가 지정된 `install.ps1`**을 하나의 GitHub Release에 함께 첨부하세요. 소스 원본 `install.ps1`이나 저장소가 지정되지 않은 초기 로컬 산출물은 온라인 설치 시 `-Repository OWNER/REPO`를 명시해야 합니다. GitHub Actions 또는 위 명령으로 생성한 주소 지정 스크립트를 게시하는 것이 가장 간단합니다.
+
+로컬 Windows 배포본의 ZIP·실행·외부 팩·오프라인 설치를 다시 검사하려면 Python 3.11 이상에서 `python scripts/verify-release.py build/release-19.0.1/artifact-verification`을 실행하세요. 실제 설치본과 사용자 PATH는 변경하지 않으며, `update --check`에는 인터넷 연결이 필요합니다.
 
 ```powershell
 # 내려받은 설치 스크립트 원본을 명시적 저장소로 실행하는 예
-powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Repository seojihun618-dotcom/omp-korean
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Repository OWNER/REPO
 ```
 
 `-ExecutionPolicy Bypass`는 그 PowerShell 프로세스에만 적용합니다. 시스템 실행 정책이나 보안 기능을 영구적으로 바꾸지 않습니다.

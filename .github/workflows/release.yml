@@ -121,4 +121,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$RELEASE_TAG" release-assets/* --repo "$GITHUB_REPOSITORY" --verify-tag --title "$RELEASE_TAG" --notes-file RELEASE_NOTES.md
+          set -euo pipefail
+          git archive --format=zip --output="release-assets/omp-korean-${RELEASE_TAG#v}-github-source.zip" HEAD
+          gh release create "$RELEASE_TAG" release-assets/* --repo "$GITHUB_REPOSITORY" --verify-tag --title "OMP Korean ${RELEASE_TAG#v}" --notes-file RELEASE_NOTES.md
