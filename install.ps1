@@ -388,7 +388,20 @@ namespace OmpKoreanInstaller {
                     [IO.File]::Move($destination, $savedFile)
                     $saved.Add($name)
                 }
-                [IO.File]::Move((Join-Path $stage $name), $destination)
+                $stagedFile = Join-Path $stage $name
+                for ($attempt = 1; ; $attempt++) {
+                    try {
+                        [IO.File]::Move($stagedFile, $destination)
+                        break
+                    } catch {
+                        $cause = $_.Exception.GetBaseException()
+                        $errorCode = $cause.HResult -band 0xFFFF
+                        if ($cause -isnot [IO.IOException] -or $errorCode -notin @(32, 33) -or $attempt -ge 13) {
+                            throw "Could not install staged file '$name': $($cause.Message)"
+                        }
+                        Start-Sleep -Seconds 1
+                    }
+                }
                 $promoted.Add($name)
             }
             if (-not $Options['NoPath']) {
