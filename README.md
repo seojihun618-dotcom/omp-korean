@@ -2,8 +2,8 @@
 
 Windows x64 및 macOS Apple Silicon·Intel용 omp 언어팩 배포판입니다. **기본 실행은 영어**이며, `OMP_LANG=ko`로 한국어를 선택할 수 있습니다. 한국어 번역은 편집 가능한 외부 팩으로 제공합니다. 공식 omp가 언어팩을 읽는 것은 아니므로 **언어팩 지원 실행 파일을 함께 설치**합니다.
 
-- 최신 배포: **[19.0.1-ko.1](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v19.0.1-ko.1)**
-- 기반 omp: **19.0.1**
+- 최신 배포: **[19.2.1-ko.1](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v19.2.1-ko.1)**
+- 기반 omp: **19.2.1**
 - 지원 대상: **Windows x64 / Windows PowerShell 5.1 이상**, **macOS arm64·x64**. macOS 실제 빌드·설치 성공 여부는 해당 릴리스의 Actions 결과를 확인하세요.
 - 일반 사용자 실행: Bun·Node.js·Git 설치 불필요
 - 원본 프로젝트: <https://github.com/can1357/oh-my-pi>
@@ -12,11 +12,12 @@ Windows x64 및 macOS Apple Silicon·Intel용 omp 언어팩 배포판입니다. 
 
 ## 이번 버전의 주요 변경
 
-- OMP **19.0.1** 기반으로 갱신했습니다.
-- 재시작 방식이 바뀐 원본에서 `omp update`가 멈추던 문제를 수정했습니다.
-- npm 배포에 외부 한국어팩을 다시 포함했습니다. 카탈로그는 **10,789개**로 이전 공개판보다 257개 늘었습니다.
+- OMP **19.2.1** 기반으로 갱신하고 한국어 소스 업데이트 연결을 복원했습니다.
+- Windows 스모크 종료 때 임시 daemon 폴더가 잠기면 최대 10초 기다리도록 수정했습니다.
+- 언어팩은 **10,789개**이며, 최신 원본과 일치하는 위치 **4,936곳**에 번역을 적용했습니다. 구조 변경으로 영어로 표시되는 부분이 늘 수 있습니다.
+- HTML 내보내기는 공식 호스팅 뷰어와 무결성 정보를 사용합니다.
 
-[변경 사항과 배포 파일](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v19.0.1-ko.1)
+[변경 사항과 배포 파일](https://github.com/seojihun618-dotcom/omp-korean/releases/tag/v19.2.1-ko.1)
 
 ## 사용자가 설치하는 방법
 
@@ -55,7 +56,7 @@ omp --help
 
 ### Windows: ZIP으로 직접 사용
 
-Releases에서 `omp-korean-19.0.1-ko.1-windows-x64.zip`을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
+Releases에서 `omp-korean-19.2.1-ko.1-windows-x64.zip`을 내려받아 압축을 풀고, 해당 폴더에서 실행합니다.
 
 ```powershell
 .\omp.exe
@@ -80,7 +81,7 @@ OMP_LANG=ko omp
 
 다른 위치에는 `OMP_INSTALL_DIR`와 `OMP_BIN_DIR`를 절대 경로로 지정할 수 있습니다. 기존 한국어·영어 외부 팩은 재설치 시 그대로 보존합니다. 체크섬·아카이브 경로·파일 종류·실제 실행 검증을 통과한 파일만 설치합니다.
 
-직접 실행하려면 Releases의 `omp-korean-19.0.1-ko.1-macos-arm64.tar.gz` 또는 `omp-korean-19.0.1-ko.1-macos-x64.tar.gz`를 별도 폴더에 풀고 `OMP_LANG=ko ./omp`를 실행하세요. `omp`, `locales/`, `update/`를 함께 유지하세요. macOS 빌드는 개발자 인증서·공증이 아닌 임시 서명을 사용합니다. Gatekeeper 경고 시 보안 기능을 해제하지 말고 배포 출처·체크섬을 확인하세요.
+직접 실행하려면 Releases의 `omp-korean-19.2.1-ko.1-macos-arm64.tar.gz` 또는 `omp-korean-19.2.1-ko.1-macos-x64.tar.gz`를 별도 폴더에 풀고 `OMP_LANG=ko ./omp`를 실행하세요. `omp`, `locales/`, `update/`를 함께 유지하세요. macOS 빌드는 개발자 인증서·공증이 아닌 임시 서명을 사용합니다. Gatekeeper 경고 시 보안 기능을 해제하지 말고 배포 출처·체크섬을 확인하세요.
 
 ## 언어팩은 어떻게 적용되나요?
 
@@ -174,7 +175,7 @@ build/                       재빌드 작업 폴더, Git 추적 제외
 
 1. 빈 GitHub 저장소를 만들고 이 폴더의 저장소 파일을 올립니다. `.github`와 `.gitignore`도 포함하세요.
 2. GitHub Actions 사용을 허용합니다. Windows x64, macOS arm64, macOS x64의 기본 러너에서 각각 빌드·실행·설치를 검증합니다.
-3. `release.json`과 같은 버전의 태그 **`v19.0.1-ko.1`**을 push합니다.
+3. `release.json`과 같은 버전의 태그 **`v19.2.1-ko.1`**을 push합니다.
 4. 세 빌드가 모두 통과해야 하나의 Release에 Windows ZIP·설치기·매니페스트·체크섬, macOS 두 아키텍처의 tar.gz·매니페스트·체크섬과 `install.sh`를 함께 게시합니다. 하나라도 실패하면 게시하지 않습니다.
 5. 게시된 Releases의 설치 스크립트 URL을 사용자에게 안내합니다.
 
@@ -186,8 +187,8 @@ git commit -m "Publish Korean language-pack distribution"
 git branch -M main
 git remote add origin https://github.com/OWNER/REPO.git
 git push -u origin main
-git tag v19.0.1-ko.1
-git push origin v19.0.1-ko.1
+git tag v19.2.1-ko.1
+git push origin v19.2.1-ko.1
 ```
 
 자동 게시에는 워크플로의 `contents: write` 권한이 필요합니다. 저장소·조직 정책이 이를 차단하면 권한 정책을 확인하세요. 개인 토큰이나 모델 API 키를 저장소에 넣을 필요는 없습니다.
@@ -212,7 +213,7 @@ macOS 산출물은 `omp-korean-<version>-macos-<arch>.tar.gz`, `release-macos-<a
 
 결과물은 `release/`에 생성됩니다. 같은 폴더의 ZIP, `SHA256SUMS`, `release.json`, **저장소 주소가 지정된 `install.ps1`**을 하나의 GitHub Release에 함께 첨부하세요. 소스 원본 `install.ps1`이나 저장소가 지정되지 않은 초기 로컬 산출물은 온라인 설치 시 `-Repository OWNER/REPO`를 명시해야 합니다. GitHub Actions 또는 위 명령으로 생성한 주소 지정 스크립트를 게시하는 것이 가장 간단합니다.
 
-로컬 Windows 배포본의 ZIP·실행·외부 팩·오프라인 설치를 다시 검사하려면 Python 3.11 이상에서 `python scripts/verify-release.py build/release-19.0.1/artifact-verification`을 실행하세요. 실제 설치본과 사용자 PATH는 변경하지 않으며, `update --check`에는 인터넷 연결이 필요합니다.
+로컬 Windows 배포본의 ZIP·실행·외부 팩·오프라인 설치를 다시 검사하려면 Python 3.11 이상에서 `python scripts/verify-release.py build/release-19.2.1/artifact-verification`을 실행하세요. 실제 설치본과 사용자 PATH는 변경하지 않으며, `update --check`에는 인터넷 연결이 필요합니다.
 
 ```powershell
 # 내려받은 설치 스크립트 원본을 명시적 저장소로 실행하는 예

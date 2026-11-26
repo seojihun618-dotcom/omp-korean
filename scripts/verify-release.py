@@ -76,9 +76,10 @@ with tempfile.TemporaryDirectory(prefix="omp-release-proof-") as temp:
         if label.startswith("help-"):
             assert all(flag in stdout for flag in ["--offline", "KIRO_API_KEY", "OTARI_BASE_URL", "KEENABLE_API_KEY"]), label
             if language in ["ko", "ko-KR"]:
-                assert "기본 제공 도구 (--tools에 지정할 이름)" in stdout and "보조 서비스를 활성 모델의 제공업체로 제한" in stdout, label
+                assert "Built-in Tools (names accepted by --tools):" in stdout and "보조 서비스를 활성 모델의 제공업체로 제한" in stdout, label
         if diagnostic:
-            assert "using English" in stderr and "{99}" not in stderr and "broken" not in stderr and "REJECTED_PACK_SECRET" not in stderr, label
+            diagnostic_output = stdout + stderr
+            assert "using English" in stderr and all(secret not in diagnostic_output for secret in ["{99}", "broken", "REJECTED_PACK_SECRET"]), label
         after = {path.relative_to(package).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None for path in package.rglob("*") if path.relative_to(package).parts[0] not in ["isolated-agent", "isolated-natives"]}
         assert before == after, (label, "Packaged files changed")
         if label == "update-check":
